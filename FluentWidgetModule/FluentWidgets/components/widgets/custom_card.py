@@ -40,12 +40,14 @@ class CardBase(CardWidget):
 
     def initIcon(self, icon):
         """ set card icon """
+        # noinspection PyAttributeOutsideInit
         self.iconWidget = IconWidget(icon)
         self.iconWidget.setFixedSize(24, 24)
         return self
 
     def initTitle(self, title):
         """ set card title """
+        # noinspection PyAttributeOutsideInit
         self.titleLabel = BodyLabel(title, self)
         return self
 

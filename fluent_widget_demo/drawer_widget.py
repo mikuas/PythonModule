@@ -29,7 +29,7 @@ class PopDrawerWidget(Widget):
         self.leftPopDrawer = LeftPopDrawerWidget(
             self,
             "弹出左侧抽屉",
-            lightBackgroundColor='pi',
+            lightBackgroundColor='pink',
             darkBackgroundColor='pink'
         )
         self.rightPopDrawer = RightPopDrawerWidget(

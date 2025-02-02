@@ -18,7 +18,7 @@ class ExpandGroupCard(ExpandGroupSettingCard):
         self.setExpandFixedHeight(70).setIconSize(24, 24)
 
     def setExpandFixedHeight(self, height: int):
-        """ set expandCard fixed height"""
+        """ set expandCard fixed height """
         self.card.setFixedHeight(height)
         self.setFixedHeight(self.card.height())
         self.setViewportMargins(0, self.card.height(), 0, 0)

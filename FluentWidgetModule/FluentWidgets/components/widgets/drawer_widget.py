@@ -17,8 +17,8 @@ class PopDrawerWidgetBase(QFrame):
             aniType=QEasingCurve.Type.Linear,
             width: int = None,
             height: int = None,
-            lightBackgroundColor: QColor | str = '#ECECEC',
-            darkBackgroundColor: QColor | str = '#202020',
+            lightBgcColor: QColor | str = '#ECECEC',
+            darkBgcColor: QColor | str = '#202020',
             xRadius=10,
             yRyRadius=10,
             clickParentHide=True
@@ -33,8 +33,8 @@ class PopDrawerWidgetBase(QFrame):
         self._height = height
         self.__xRadius = xRadius
         self.__yRadius = yRyRadius
-        self.__lightBgcColor = QColor(lightBackgroundColor)
-        self.__darkBgcColor = QColor(darkBackgroundColor)
+        self.__lightBgcColor = QColor(lightBgcColor)
+        self.__darkBgcColor = QColor(darkBgcColor)
         self._clickParentHide = clickParentHide
 
         self._title = SubtitleLabel(title, self)
@@ -69,7 +69,7 @@ class PopDrawerWidgetBase(QFrame):
     def setTitleText(self, text: str):
         self._title.setText(text)
 
-    def __createAnimation(self, startPoint: QPoint, endPoint: QPoint):
+    def __createPosAni(self, startPoint: QPoint, endPoint: QPoint):
         self.__posAni = QPropertyAnimation(self, b'pos')
         self.__posAni.setEasingCurve(self.aniType)
         self.__posAni.setDuration(self.duration)
@@ -102,11 +102,11 @@ class PopDrawerWidgetBase(QFrame):
             return
         self.setVisible(True)
         self.raise_()
-        self.__createAnimation(*self.getShowPos())
+        self.__createPosAni(*self._getShowPos())
 
     def hide(self):
         if self.isVisible():
-            self.__createAnimation(*self.getHidePos())
+            self.__createPosAni(*self._getHidePos())
             QTimer.singleShot(self.duration, lambda: self.setVisible(False))
 
     def eventFilter(self, obj, event):
@@ -130,10 +130,10 @@ class PopDrawerWidgetBase(QFrame):
         painter.setBrush(self.getBackgroundColor())
         painter.drawRoundedRect(self.rect(), self.getXRadius(), self.getYRadius())
 
-    def getShowPos(self):
+    def _getShowPos(self):
         raise NotImplementedError
 
-    def getHidePos(self):
+    def _getHidePos(self):
         raise NotImplementedError
 
 
@@ -148,21 +148,21 @@ class LeftPopDrawerWidget(PopDrawerWidgetBase):
             aniType=QEasingCurve.Type.Linear,
             width=None,
             height=None,
-            lightBackgroundColor='#ECECEC',
-            darkBackgroundColor='#202020',
+            lightBgcColor='#ECECEC',
+            darkBgcColor='#202020',
             xRadius=10,
             yRyRadius=10,
             clickParentHide=True
     ):
         super().__init__(
             parent, title, duration, aniType, width or 300, height or parent.height(),
-            lightBackgroundColor, darkBackgroundColor, xRadius, yRyRadius, clickParentHide
+            lightBgcColor, darkBgcColor, xRadius, yRyRadius, clickParentHide
         )
 
-    def getShowPos(self):
+    def _getShowPos(self):
         return QPoint(-self.width(), 0), QPoint(0, 0)
 
-    def getHidePos(self):
+    def _getHidePos(self):
         return QPoint(0, 0), QPoint(-self.width(), 0)
 
 
@@ -177,23 +177,23 @@ class RightPopDrawerWidget(PopDrawerWidgetBase):
             aniType=QEasingCurve.Type.Linear,
             width=None,
             height=None,
-            lightBackgroundColor='#ECECEC',
-            darkBackgroundColor='#202020',
+            lightBgcColor='#ECECEC',
+            darkBgcColor='#202020',
             xRadius=10,
             yRyRadius=10,
             clickParentHide=True
     ):
         super().__init__(
             parent, title, duration, aniType, width or 300, height or parent.height(),
-            lightBackgroundColor, darkBackgroundColor, xRadius, yRyRadius, clickParentHide
+            lightBgcColor, darkBgcColor, xRadius, yRyRadius, clickParentHide
         )
 
-    def getShowPos(self):
+    def _getShowPos(self):
         parentWidth = self.parent().width()
         width = self.width()
         return QPoint(parentWidth + width, 0), QPoint(parentWidth - width, 0)
 
-    def getHidePos(self):
+    def _getHidePos(self):
         parentWidth = self.parent().width()
         width = self.width()
         return QPoint(parentWidth - width, 0), QPoint(parentWidth + width, 0)
@@ -203,7 +203,7 @@ class RightPopDrawerWidget(PopDrawerWidgetBase):
             if event.type() in [QEvent.Type.Resize, QEvent.Type.WindowStateChange]:
                 self._height = self.parent().height()
                 self.setFixedSize(self._width, self._height)
-                self.move(self.getShowPos()[1])
+                self.move(self._getShowPos()[1])
             if self._clickParentHide and event.type() == QEvent.Type.MouseButtonPress:
                 self.hide()
         return super().eventFilter(obj, event)
@@ -220,21 +220,21 @@ class TopPopDrawerWidget(PopDrawerWidgetBase):
             aniType=QEasingCurve.Type.Linear,
             width=None,
             height=None,
-            lightBackgroundColor='#ECECEC',
-            darkBackgroundColor='#202020',
+            lightBgcColor='#ECECEC',
+            darkBgcColor='#202020',
             xRadius=10,
             yRyRadius=10,
             clickParentHide=True
     ):
         super().__init__(
             parent, title, duration, aniType, width or parent.width(), height or 250,
-            lightBackgroundColor, darkBackgroundColor, xRadius, yRyRadius, clickParentHide
+            lightBgcColor, darkBgcColor, xRadius, yRyRadius, clickParentHide
         )
 
-    def getShowPos(self):
+    def _getShowPos(self):
         return QPoint(0, -self.height()), QPoint(0, 0)
 
-    def getHidePos(self):
+    def _getHidePos(self):
         return QPoint(0, 0), QPoint(0, -self.height())
 
     def eventFilter(self, obj, event):
@@ -242,7 +242,7 @@ class TopPopDrawerWidget(PopDrawerWidgetBase):
             if event.type() in [QEvent.Type.Resize, QEvent.Type.WindowStateChange]:
                 self._width = self.parent().width()
                 self.setFixedSize(self._width, self._height)
-                self.move(self.getShowPos()[1])
+                self.move(self._getShowPos()[1])
             if self._clickParentHide and event.type() == QEvent.Type.MouseButtonPress:
                 self.hide()
         return False
@@ -259,23 +259,23 @@ class BottomPopDrawerWidget(PopDrawerWidgetBase):
             aniType=QEasingCurve.Type.Linear,
             width=None,
             height=None,
-            lightBackgroundColor='#ECECEC',
-            darkBackgroundColor='#202020',
+            lightBgcColor='#ECECEC',
+            darkBgcColor='#202020',
             xRadius=10,
             yRyRadius=10,
             clickParentHide=True
     ):
         super().__init__(
             parent, title, duration, aniType, width or parent.width(), height or 250,
-            lightBackgroundColor, darkBackgroundColor, xRadius, yRyRadius, clickParentHide
+            lightBgcColor, darkBgcColor, xRadius, yRyRadius, clickParentHide
         )
 
-    def getShowPos(self):
+    def _getShowPos(self):
         parentHeight = self.parent().height()
         height = self.height()
         return QPoint(0, parentHeight + height), QPoint(0, parentHeight - height)
 
-    def getHidePos(self):
+    def _getHidePos(self):
         parentHeight = self.parent().height()
         height = self.height()
         return QPoint(0, parentHeight - height), QPoint(0, parentHeight + height)
@@ -285,7 +285,7 @@ class BottomPopDrawerWidget(PopDrawerWidgetBase):
             if event.type() in [QEvent.Type.Resize, QEvent.Type.WindowStateChange]:
                 self._width = self.parent().width()
                 self.setFixedSize(self._width, self._height)
-                self.move(self.getShowPos()[1])
+                self.move(self._getShowPos()[1])
             if self._clickParentHide and event.type() == QEvent.Type.MouseButtonPress:
                 self.hide()
         return False
