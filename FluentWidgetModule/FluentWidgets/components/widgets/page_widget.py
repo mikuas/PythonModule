@@ -1,7 +1,7 @@
 # coding:utf-8
 from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QWidget
-from qfluentwidgets import PipsScrollButtonDisplayMode, PopUpAniStackedWidget, Theme, setTheme
+from qfluentwidgets import PipsScrollButtonDisplayMode, PopUpAniStackedWidget
 
 from ..layout import VBoxLayout, HBoxLayout
 from .pips_pager import PipsPager
@@ -17,7 +17,6 @@ class PagerWidgetBase(QWidget):
         self._stackedWidget = PopUpAniStackedWidget(self)
         self._pager.currentIndexChanged.connect(lambda index: self._stackedWidget.setCurrentIndex(index))
         self.__widgets = []  # type: [QWidget]
-        setTheme(Theme.AUTO)
 
     def addWidget(self, widget: QWidget, deltaX=0, deltaY=76):
         """ add widget to stacked widget """

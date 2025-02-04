@@ -23,26 +23,26 @@ class PopDrawerWidget(Widget):
         self.topPopDrawer = TopPopDrawerWidget(
             self,
             "弹出顶部抽屉",
-            lightBackgroundColor='skyblue',
-            darkBackgroundColor='skyblue'
+            lightBgcColor='skyblue',
+            darkBgcColor='skyblue'
         )
         self.leftPopDrawer = LeftPopDrawerWidget(
             self,
             "弹出左侧抽屉",
-            lightBackgroundColor='pink',
-            darkBackgroundColor='pink'
+            lightBgcColor='pink',
+            darkBgcColor='pink'
         )
         self.rightPopDrawer = RightPopDrawerWidget(
             self,
             "弹出右侧抽屉",
-            lightBackgroundColor='deepskyblue',
-            darkBackgroundColor='deepskyblue'
+            lightBgcColor='deepskyblue',
+            darkBgcColor='deepskyblue'
         )
         self.bottomPopDrawer = BottomPopDrawerWidget(
             self,
             "弹出底部抽屉",
-            lightBackgroundColor='deeppink',
-            darkBackgroundColor='deeppink'
+            lightBgcColor='deeppink',
+            darkBgcColor='deeppink'
         )
 
     def initLayout(self):

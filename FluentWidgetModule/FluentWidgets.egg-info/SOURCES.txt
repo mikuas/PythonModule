@@ -8,18 +8,16 @@ FluentWidgets.egg-info/top_level.txt
 FluentWidgets/_rc/__init__.py
 FluentWidgets/_rc/resources.py
 FluentWidgets/common/__init__.py
-FluentWidgets/common/animation.py
 FluentWidgets/common/fluent_icon.py
 FluentWidgets/common/font.py
 FluentWidgets/common/splitter.py
 FluentWidgets/common/system_tray_icon.py
-FluentWidgets/common/theme.py
 FluentWidgets/common/tool_info.py
 FluentWidgets/components/__init__.py
 FluentWidgets/components/layout/__init__.py
 FluentWidgets/components/layout/layout.py
 FluentWidgets/components/menu/__init__.py
-FluentWidgets/components/menu/context_menu_widget.py
+FluentWidgets/components/menu/menu.py
 FluentWidgets/components/navigation/__init__.py
 FluentWidgets/components/navigation/navigation_bar.py
 FluentWidgets/components/navigation/navigation_widget.py
@@ -37,6 +35,7 @@ FluentWidgets/components/widgets/info_bar.py
 FluentWidgets/components/widgets/list_widget.py
 FluentWidgets/components/widgets/page_widget.py
 FluentWidgets/components/widgets/pips_pager.py
+FluentWidgets/components/widgets/pop_up_stacked_widget.py
 FluentWidgets/components/widgets/scroll_widget.py
 FluentWidgets/components/widgets/slider_card.py
 FluentWidgets/components/widgets/table_widget.py

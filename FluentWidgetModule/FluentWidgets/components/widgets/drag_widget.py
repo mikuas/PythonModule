@@ -1,5 +1,6 @@
 # coding:utf-8
 from PySide6.QtCore import QSize, Signal, QFileInfo, Qt
+from PySide6.QtGui import QPainter, QPen, QColor
 from PySide6.QtWidgets import QFileDialog, QFrame, QLabel
 
 from qfluentwidgets import HyperlinkButton
@@ -13,9 +14,14 @@ class DragFolderWidget(QFrame):
     draggedChange = Signal(list)
     selectionChange = Signal(list)
 
-    def __init__(self, parent=None, defaultDir="./"):
+    def __init__(self, parent=None, defaultDir="./", lineColor="#4aa3ee", isDashLine=False):
         super().__init__(parent)
-        self.defaultDir = defaultDir
+        self._xRadius = 16
+        self._yRadius = 16
+        self.__lineWidth = 1
+        self._defaultDir = defaultDir
+        self.__lineColor = QColor(lineColor)
+        self.__enableDashLine = isDashLine
         self.vBoxLayout = VBoxLayout(self)
         self.setAcceptDrops(True)
         self.setMinimumSize(QSize(256, 200))
@@ -30,19 +36,49 @@ class DragFolderWidget(QFrame):
         self.vBoxLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.button.clicked.connect(self._showDialog)
-        self.setBorderColor('skyblue')
 
     def _showDialog(self):
-        return self.selectionChange.emit([QFileDialog.getExistingDirectory(self, "选择文件夹", self.defaultDir)])
+        return self.selectionChange.emit([QFileDialog.getExistingDirectory(self, "选择文件夹", self._defaultDir)])
 
     def setLabelText(self, text):
         self.label.setText(text)
 
-    def setBorderColor(self, color: str):
-        style = " QLabel {border: none; color: none;}"
-        self.setStyleSheet("QFrame {" + f"border: 3px dotted {color}; border-radius: 12px;" + "}" + style)
+    def setBorderColor(self, color: QColor | str):
+        self.__lineColor = QColor(color)
+        self.update()
 
-    """ 拖动进入事件 """
+    def enableDashLine(self, isEnable: bool):
+        self.__enableDashLine = isEnable
+        self.update()
+
+    def setXRadius(self, radius: int):
+        self._xRadius = radius
+        self.update()
+        return self
+
+    def setYRadius(self, radius: int):
+        self._yRadius = radius
+        self.update()
+        return self
+
+    def setBorderWidth(self, width: int):
+        self.__lineWidth = width
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        pen = QPen(self.__lineColor)
+        pen.setWidth(self.__lineWidth)
+        if self.__enableDashLine:
+            pen.setStyle(Qt.PenStyle.DashLine)
+            pen.setDashPattern([8, 4])
+        painter.setPen(pen)
+
+        rect = self.rect()
+        rect.adjust(2, 2, -2, -2)
+        painter.drawRoundedRect(rect, self._xRadius, self._yRadius)
+
     def dragEnterEvent(self, event):
         super().dragEnterEvent(event)
         if event.mimeData().hasUrls:
@@ -50,7 +86,6 @@ class DragFolderWidget(QFrame):
         else:
             event.ignore()
 
-    """ 拖动放置事件 """
     def dropEvent(self, event):
         super().dropEvent(event)
         urls = [url.toLocalFile() for url in event.mimeData().urls()]
@@ -69,18 +104,24 @@ class DragFolderWidget(QFrame):
 
 class DragFileWidget(DragFolderWidget):
     """ get dray file widget """
-    def __init__(self, parent=None, defaultDir="./", fileFilter="所有文件 (*.*);; 文本文件 (*.txt)"):
+    def __init__(
+            self,
+            parent=None,
+            defaultDir="./",
+            fileFilter="所有文件 (*.*);; 文本文件 (*.txt)",
+            lineColor="#4aa3ee",
+            isDashLine=False
+    ):
         """ 多个文件类型用;;分开 """
-        super().__init__(parent)
+        super().__init__(parent, defaultDir, lineColor, isDashLine)
         self.label.setContentsMargins(12, 0, 0, 0)
         self.setLabelText("拖动任意文件到此")
         self.button.setText("选择文件")
-        self.defaultDir = defaultDir
-        self.fileFilter = fileFilter
+        self._fileFilter = fileFilter
 
     def _showDialog(self):
         return self.selectionChange.emit(
-            QFileDialog.getOpenFileNames(self, "选择文件", self.defaultDir, self.fileFilter)[0]
+            QFileDialog.getOpenFileNames(self, "选择文件", self._defaultDir, self._fileFilter)[0]
         )
 
     def dropEvent(self, event):

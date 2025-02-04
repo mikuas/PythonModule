@@ -6,7 +6,7 @@ from FluentWidgets import (
     SwitchButtonCard, CheckBoxCard, HyperLinkCard,
     DropDownCard, PrimaryDropDownCard, TransparentDropDownCard,
     DropDownToolCard, PrimaryDropDownToolCard, TransparentDropDownToolCard,
-    SplitCard, PrimarySplitCard
+    SplitCard, PrimarySplitCard, MoreButtonCard, MorePrimaryButtonCard, MoreTransparentButtonCard
 )
 from qfluentwidgets import FluentIcon
 
@@ -27,6 +27,9 @@ class ButtonCardWidget(SideNavigationWidget):
         self.initDropToolButton()
         # 分割按钮
         self.initSplitButton()
+
+        #
+        self.initTwoButton()
 
         self.initNavigation()
         self.setCurrentWidget('标准按钮').enableReturn(True).enableTransparentBackground(True)
@@ -259,6 +262,37 @@ class ButtonCardWidget(SideNavigationWidget):
 
         self.splitBtnWidget.layout.addWidgets([btn1, btn2])
 
+    def initTwoButton(self):
+        self.moreButtonWidget = SubWidget(self)
+        btn1 = MoreButtonCard(
+            FluentIcon.RETURN,
+            'More Button',
+            'More Button',
+            '确定',
+            FluentIcon.APPLICATION,
+            self
+        )
+
+        btn2 = MorePrimaryButtonCard(
+            FluentIcon.RETURN,
+            'More Button',
+            'More Button',
+            '确定',
+            FluentIcon.APPLICATION,
+            self
+        )
+
+        btn3 = MoreTransparentButtonCard(
+            FluentIcon.RETURN,
+            'More Button',
+            'More Button',
+            '确定',
+            FluentIcon.APPLICATION,
+            self
+        )
+
+        self.moreButtonWidget.layout.addWidgets([btn1, btn2, btn3])
+
     def initNavigation(self):
         self.addSubInterface(
             '标准按钮',
@@ -290,6 +324,11 @@ class ButtonCardWidget(SideNavigationWidget):
             '拆分按钮',
             WinFluentIcon.XIN_HAO,
             self.splitBtnWidget
+        ).addSubInterface(
+            'More Button',
+            'More Button',
+            WinFluentIcon.SEARCH_MORE,
+            self.moreButtonWidget
         )
 
 

@@ -1,6 +1,5 @@
 # coding:utf-8
 from PySide6.QtCore import Qt
-
 from qfluentwidgets import TransparentToolButton, FluentIcon, PushButton, PrimaryPushButton, TransparentPushButton
 
 from .button_card import ButtonCardBase

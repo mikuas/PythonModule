@@ -59,6 +59,7 @@ class Widget(QWidget):
         return self._backgroundImg
 
     def paintEvent(self, event):
+        super().paintEvent(event)
         if self.__transparentBgc:
             return
         painter = QPainter(self)
@@ -66,7 +67,7 @@ class Widget(QWidget):
         painter.setBrush(self.getColor())
         painter.setPen(Qt.NoPen)
         painter.drawRoundedRect(self.rect(), self.getXRadius(), self.getYRadius())
-        if self._backgroundImg is not None:
+        if self._backgroundImg:
             path = QPainterPath()
             rect = QRectF(self.rect())
             path.addRoundedRect(rect, self.getXRadius(), self.getYRadius())
@@ -75,3 +76,4 @@ class Widget(QWidget):
 
     def enableTransparentBackground(self, enable: bool):
         self.__transparentBgc = enable
+        self.update()

@@ -1,12 +1,11 @@
 import sys
 
 from FluentWidgets import Widget, VBoxLayout, ToastInfoBarPosition, ToastInfoBar
-from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QApplication
 from qfluentwidgets import PushButton, InfoBar
 
-
 import random
+
 
 class Window(Widget):
     def __init__(self):
@@ -32,49 +31,69 @@ class Window(Widget):
 
         self.connectSignalSlot()
 
-
     def connectSignalSlot(self):
         self.tb.clicked.connect(
             lambda:
             ToastInfoBar.success(
-                self, 'top', f'success info bar {random.randint(0, 100)}', position=ToastInfoBarPosition.TOP
+                self,
+                'top',
+                f'success info bar {random.randint(0, 100)}',
+                5000,
+                False,
+                ToastInfoBarPosition.TOP
             )
         )
         self.tlb.clicked.connect(
             lambda:
             ToastInfoBar.warning(
-                self, 'top left', 'warning info bar', position=ToastInfoBarPosition.TOP_LEFT
+                self,
+                'top left',
+                'warning info bar',
+                3000,
+                position=ToastInfoBarPosition.TOP_LEFT
             )
         )
         self.trb.clicked.connect(
             lambda:
             ToastInfoBar.info(
-                self, 'top right', 'info bar', position=ToastInfoBarPosition.TOP_RIGHT
+                self,
+                'top right',
+                'info bar',
+                500,
+                position=ToastInfoBarPosition.TOP_RIGHT
             )
         )
         self.bb.clicked.connect(
             lambda:
             ToastInfoBar.error(
-                self, 'bottom', 'error info bar', position=ToastInfoBarPosition.BOTTOM
+                self,
+                'bottom',
+                'error info bar',
+                position=ToastInfoBarPosition.BOTTOM
             )
         )
         self.blb.clicked.connect(
             lambda:
             ToastInfoBar.custom(
-                self, 'bottom left', 'custom info bar', QColor('skyblue'), position=ToastInfoBarPosition.BOTTOM_LEFT
+                self,
+                'bottom left',
+                'custom info bar',
+                'skyblue',
+                position=ToastInfoBarPosition.BOTTOM_LEFT
             )
         )
         self.brb.clicked.connect(
             lambda:
             ToastInfoBar.custom(
-                self, 'bottom right', 'custom info bar', QColor('deeppink'), position=ToastInfoBarPosition.BOTTOM_RIGHT
+                self,
+                'bottom right',
+                'custom info bar',
+                'deeppink',
+                position=ToastInfoBarPosition.BOTTOM_RIGHT,
+                isCustomBgcColor=True,
+                bgcColor='skyblue',
             )
         )
-
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        print('Resize')
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget
 
 from qfluentwidgets import (
     Pivot, SegmentedWidget, SegmentedToolWidget, SegmentedToggleToolWidget, FluentIconBase, TabBar,
-    TabCloseButtonDisplayMode, PopUpAniStackedWidget, setTheme, Theme, HorizontalSeparator
+    TabCloseButtonDisplayMode, PopUpAniStackedWidget, VerticalSeparator
 )
 
 from ..layout import VBoxLayout, HBoxLayout
@@ -18,11 +18,9 @@ class NavigationBase(Widget):
     """ 导航组件基类 """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        setTheme(Theme.AUTO)
         self.hBoxLayout = HBoxLayout(self)
-        self.navigation = None
-        self._key = '0'
         self.stackedWidget = PopUpAniStackedWidget(self)
+        self.navigation = None
 
     def _initLayout(self):
         self.vLayout = VBoxLayout(self)
@@ -31,16 +29,6 @@ class NavigationBase(Widget):
         self.vLayout.addWidgets([self.navigation, self.stackedWidget])
         self.vLayout.addLayout(self.hLayout)
 
-    def addSeparator(self, index=1):
-        separator = HorizontalSeparator(self)
-        self.vLayout.insertWidget(index, separator)
-        return self
-
-    def addNavigationSeparator(self, index: int):
-        self.navigation.insertItem(index, self._key, '|').setFixedWidth(1)
-        self._key = str(int(self._key) + 1)
-        return self
-
     def addSubInterface(
             self,
             routeKey: str,
@@ -48,21 +36,24 @@ class NavigationBase(Widget):
             widget: QWidget,
             icon: Union[QIcon, str, FluentIconBase] = None
     ):
-        """ add sub interface, rotKey isUnique"""
+        """
+        add Sub Interface
+
+        ----------
+            routeKey: str
+                routeKey Are Unique
+
+            text: str
+                navigation text
+
+            widget: QWidget
+                widget of current navigation
+
+            icon: str | QIcon | FluentIconBase
+                navigation icon
+        """
         self.stackedWidget.addWidget(widget)
         self.navigation.addItem(routeKey, text, lambda: self.switchTo(widget), icon)
-        return self
-
-    def addSubInterfaces(
-            self,
-            routeKeys: List[str],
-            texts: List[str],
-            widgets: List[QWidget],
-            icons: List[Union[QIcon, str, FluentIconBase]] = None
-    ):
-        icons = icons if icons is not None else [None for _ in range(len(routeKeys))]
-        for key, text, widget, icon in zip(routeKeys, texts, widgets, icons):
-            self.addSubInterface(key, text, widget, icon)
         return self
 
     def switchTo(self, widget: QWidget):
@@ -83,14 +74,33 @@ class PivotNav(NavigationBase):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.navigation = Pivot(self)
+        self._color = None
+        self._enableSplitLine = True
         self._initLayout()
+
+    def addNavSeparator(self):
+        self.insertNavSeparator(-1)
+
+    def insertNavSeparator(self, index: int):
+        separator = VerticalSeparator(self)
+        separator.setFixedHeight(self.navigation.height())
+        self.navigation.hBoxLayout.insertWidget(index, separator)
+
+    def enableSplitLine(self, isEnable: bool):
+        self._enableSplitLine = isEnable
+        self.update()
+
+    def setSplitLineColor(self, color: QColor | str):
+        self._color = QColor(color)
+        self.update()
 
     def paintEvent(self, event):
         super().paintEvent(event)
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setPen(QPen(QColor('#2d2d2d'), 1, Qt.SolidLine))
-        painter.drawLine(0, 65, self.width(), 60)
+        if self._enableSplitLine:
+            painter = QPainter(self)
+            painter.setRenderHint(QPainter.Antialiasing)
+            painter.setPen(QPen(self._color or QColor('#2d2d2d'), 1, Qt.SolidLine))
+            painter.drawLine(0, 65, self.width(), 60)
 
 
 class SegmentedNav(PivotNav):
@@ -120,16 +130,6 @@ class SegmentedToolNav(PivotNav):
     ):
         self.stackedWidget.addWidget(widget)
         self.navigation.addItem(routeKey, icon, lambda: self.switchTo(widget))
-        return self
-
-    def addSubInterfaces(
-            self,
-            routeKeys: List[str],
-            widgets: List[QWidget],
-            icons: List[Union[QIcon, str, FluentIconBase]]
-    ):
-        for key, widget, icon in zip(routeKeys, widgets, icons):
-            self.addSubInterface(key, widget, icon)
         return self
 
     def paintEvent(self, event):
@@ -277,6 +277,25 @@ class SideNavigationWidget(Widget):
             widget: QWidget,
             position=NavigationItemPosition.SCROLL
     ):
+        """
+        add Sub Interface
+
+        ----------
+            routeKey: str
+                routeKey Are Unique
+
+            text: str
+                navigation text
+
+            icon: str | QIcon | FluentIconBase
+                navigation icon
+
+            widget: QWidget
+                add widget to navigation
+
+            position: NavigationItemPosition
+                the add of navigation position
+        """
         self.__addToStackedWidget(routeKey, widget)
         self.navigationBar.addItem(routeKey, icon, text, False, lambda: self.switchTo(widget), position)
         return self
@@ -290,6 +309,7 @@ class SideNavigationWidget(Widget):
         return self
 
     def setCurrentWidget(self, routeKey: str):
+        """ set current displayed widget """
         self.navigationBar.setCurrentItem(routeKey)
         return self
 

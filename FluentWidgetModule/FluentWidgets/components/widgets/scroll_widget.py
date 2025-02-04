@@ -1,7 +1,7 @@
 # coding:utf-8
 from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QWidget
-from qfluentwidgets import SingleDirectionScrollArea, SmoothScrollArea, ScrollArea, setTheme, Theme
+from qfluentwidgets import SingleDirectionScrollArea, SmoothScrollArea, ScrollArea
 
 from ..layout import VBoxLayout, HBoxLayout
 
@@ -13,7 +13,6 @@ class SingleScrollWidgetBase(SingleDirectionScrollArea):
         self._widget = QWidget()
         self.setWidget(self._widget)
         self.setWidgetResizable(True)
-        setTheme(Theme.AUTO)
         # self.enableTransparentBackground()
 
 
@@ -35,7 +34,6 @@ class ScrollWidget(ScrollArea):
     """ 平滑双向滚动小部件 """
     def __init__(self, parent=None):
         super().__init__(parent)
-        setTheme(Theme.AUTO)
         # self.enableTransparentBackground()
         self.__widget = QWidget()
         self.setWidget(self.__widget)

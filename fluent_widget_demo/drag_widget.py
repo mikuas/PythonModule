@@ -11,6 +11,12 @@ class DragWidget(Widget):
         self.enableTransparentBackground(True)
         self.connectSignalSlot()
 
+        self.dragFolderWidget.setBorderColor('red')
+        self.dragFolderWidget.enableDashLine(True)
+        self.dragFolderWidget.setXRadius(18)
+        self.dragFolderWidget.setYRadius(18)
+        self.dragFolderWidget.setBorderWidth(5)
+
     def initDragWidget(self):
         self.dragFileWidget = DragFileWidget(self)
         self.dragFolderWidget = DragFolderWidget(self)

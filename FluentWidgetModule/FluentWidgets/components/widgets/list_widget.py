@@ -11,22 +11,19 @@ class ListWidget(List):
     """ 列表组件 """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.setFocusPolicy(Qt.NoFocus)
 
     def addIconItems(
             self,
             icons: list[Union[QIcon, str, FluentIconBase, FluentIcon]],
             items: list[str],
             itemHeight=45,
-            alignFlag=Qt.AlignmentFlag.AlignVertical_Mask
+            alignFlag=Qt.AlignVertical_Mask
     ) -> list[QListWidgetItem]:
         listItem = []
         for icon, item in zip(icons, items):
             item = QListWidgetItem(item)
-            if type(icon) is not str:
-                item.setIcon(Icon(icon))
-            else:
-                item.setIcon(QIcon(icon))
+            item.setIcon(Icon(icon))
             item.setTextAlignment(alignFlag)
             item.setSizeHint(QSize(self.width(), itemHeight))
             self.addItem(item)
@@ -37,7 +34,7 @@ class ListWidget(List):
             self,
             items: list[str],
             itemHeight=45,
-            alignFlag=Qt.AlignmentFlag.AlignVertical_Mask
+            alignFlag=Qt.AlignVertical_Mask
     ) -> list[QListWidgetItem]:
         listItem = []
         for item in items:

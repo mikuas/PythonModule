@@ -26,4 +26,3 @@ class SystemTrayIcon(QSystemTrayIcon):
 
     def addActions(self, actions: List[QAction] | List[QAction]):
         self.menu.addActions(actions)
-        self.setContextMenu(self.menu)

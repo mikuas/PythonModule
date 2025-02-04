@@ -5,7 +5,7 @@ from PySide6.QtGui import QPainter, QColor, Qt, QIcon, QPen
 from PySide6.QtCore import Signal, QRect,  QEvent
 from PySide6.QtWidgets import QWidget
 from qfluentwidgets import (
-    isDarkTheme, Theme, setTheme, FluentIcon, Icon, FluentIconBase, themeColor, TransparentToolButton
+    isDarkTheme, FluentIcon, Icon, FluentIconBase, themeColor, TransparentToolButton
 )
 
 from ...common import setToolTipInfo, setToolTipInfos
@@ -26,6 +26,7 @@ class NavigationItemPosition(Enum):
 
 
 class NavigationWidget(QWidget):
+    """ navigation widget """
     clicked = Signal()
     EXPAND_WIDTH = 328
 
@@ -38,12 +39,13 @@ class NavigationWidget(QWidget):
         self.isSelected = isSelected
         self.selectedColor = None
         self.setFixedSize(50, 35)
-        setTheme(Theme.AUTO)
 
     def setSelectedColor(self, color: QColor | str):
+        """ set current selected widget color """
         self.selectedColor = QColor(color)
 
     def setExpend(self, isExpand: bool):
+        """ set expand widget """
         self.isExpand = isExpand
         self.update()
 
@@ -101,10 +103,11 @@ class NavigationWidget(QWidget):
 
 class NavigationSeparator(NavigationWidget):
     """ navigation separator """
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, color: QColor = None):
         super().__init__(False, parent)
         self.setFixedSize(parent.width() - 20, 1)
         self.parent = parent
+        self.color = color
         parent.installEventFilter(self)
 
     def eventFilter(self, obj, event):
@@ -117,11 +120,12 @@ class NavigationSeparator(NavigationWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         color = 255 if isDarkTheme() else 0
-        painter.setPen(QPen(QColor(color, color, color, 128)))
+        painter.setPen(QPen(self.color or QColor(color, color, color, 128)))
         painter.drawLine(0, 1, self.width(), 1)
 
 
 class NavigationButton(NavigationWidget):
+    """ navigation button widget """
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], text='', isSelected=False, parent=None):
         super().__init__(isSelected, parent)
         self._icon = Icon(icon)
@@ -141,6 +145,10 @@ class NavigationButton(NavigationWidget):
         self._icon = Icon(icon)
         self.update()
 
+    def setTextMargin(self, margin: int):
+        self._margin = margin
+        self.update()
+
     def getText(self):
         return self._text
 
@@ -157,6 +165,7 @@ class NavigationButton(NavigationWidget):
 
 
 class NavigationBar(QWidget):
+    """ navigation bar widget """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
@@ -332,13 +341,12 @@ class NavigationBar(QWidget):
             position: NavigationItemPosition
                 position to add to the navigation bar
         """
-        w = widget
-        w.clicked.connect(lambda: self._onClickWidget(w))
-        w.clicked.connect(onClick)
-        self.__items[routeKey] = w
-        w.setProperty("routeKey", routeKey)
-        setToolTipInfo(w, routeKey, 1500)
-        return self._insertWidgetToLayout(index, w, position)
+        widget.clicked.connect(lambda: self._onClickWidget(widget))
+        widget.clicked.connect(onClick)
+        self.__items[routeKey] = widget
+        widget.setProperty("routeKey", routeKey)
+        setToolTipInfo(widget, routeKey, 1500)
+        return self._insertWidgetToLayout(index, widget, position)
 
     def addSeparator(self, position=NavigationItemPosition.SCROLL):
         """ add separator to navigation bar """

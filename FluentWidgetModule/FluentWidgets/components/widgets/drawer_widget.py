@@ -4,7 +4,7 @@ from PySide6.QtGui import QColor, QPainter
 from ..layout import VBoxLayout, HBoxLayout
 from PySide6.QtWidgets import QFrame, QWidget
 from PySide6.QtCore import Qt, QPropertyAnimation, QPoint, QEasingCurve, QTimer, QSize, QEvent
-from qfluentwidgets import FluentIcon, TransparentToolButton, SubtitleLabel, setTheme, Theme, qconfig
+from qfluentwidgets import FluentIcon, TransparentToolButton, SubtitleLabel, isDarkTheme
 
 
 class PopDrawerWidgetBase(QFrame):
@@ -12,30 +12,24 @@ class PopDrawerWidgetBase(QFrame):
     def __init__(
             self,
             parent,
-            title='弹出抽屉',
+            title: str,
             duration=250,
             aniType=QEasingCurve.Type.Linear,
-            width: int = None,
-            height: int = None,
             lightBgcColor: QColor | str = '#ECECEC',
-            darkBgcColor: QColor | str = '#202020',
-            xRadius=10,
-            yRyRadius=10,
-            clickParentHide=True
+            darkBgcColor: QColor | str = '#202020'
     ):
         super().__init__(parent)
         # Linear
         # InBack
-        setTheme(Theme.AUTO)
         self.aniType = aniType
         self.duration = duration
-        self._width = width
-        self._height = height
-        self.__xRadius = xRadius
-        self.__yRadius = yRyRadius
+        self._width = 300
+        self._height = parent.height()
+        self.__xRadius = 8
+        self.__yRadius = 8
         self.__lightBgcColor = QColor(lightBgcColor)
         self.__darkBgcColor = QColor(darkBgcColor)
-        self._clickParentHide = clickParentHide
+        self._clickParentHide = True
 
         self._title = SubtitleLabel(title, self)
         self._title.setVisible(bool(title))
@@ -58,8 +52,8 @@ class PopDrawerWidgetBase(QFrame):
         self.__hBoxLayout.addWidget(self._title)
         self.__hBoxLayout.addWidget(self._closeButton, alignment=Qt.AlignmentFlag.AlignRight)
 
-    def setClickParentHide(self, isHide: bool):
-        self._clickParentHide = isHide
+    def setClickParentHide(self, hide: bool):
+        self._clickParentHide = hide
 
     def addWidget(self, widget: QWidget):
         """ add widget to layout """
@@ -87,8 +81,12 @@ class PopDrawerWidgetBase(QFrame):
         self.__darkBgcColor = QColor(darkColor)
         self.update()
 
+    def setDrawerSize(self, width: int, height: int):
+        self._width = width
+        self._height = height
+
     def getBackgroundColor(self):
-        return self.__darkBgcColor if qconfig.theme == Theme.DARK else self.__lightBgcColor
+        return self.__darkBgcColor if isDarkTheme() else self.__lightBgcColor
 
     def getXRadius(self):
         return self.__xRadius
@@ -119,7 +117,6 @@ class PopDrawerWidgetBase(QFrame):
         return super().eventFilter(obj, event)
 
     def mousePressEvent(self, event):
-        # 阻止事件传递给父类控件
         event.accept()
 
     def paintEvent(self, event):
@@ -143,21 +140,13 @@ class LeftPopDrawerWidget(PopDrawerWidgetBase):
     def __init__(
             self,
             parent,
-            title='弹出抽屉',
+            title: str,
             duration=250,
             aniType=QEasingCurve.Type.Linear,
-            width=None,
-            height=None,
             lightBgcColor='#ECECEC',
-            darkBgcColor='#202020',
-            xRadius=10,
-            yRyRadius=10,
-            clickParentHide=True
+            darkBgcColor='#202020'
     ):
-        super().__init__(
-            parent, title, duration, aniType, width or 300, height or parent.height(),
-            lightBgcColor, darkBgcColor, xRadius, yRyRadius, clickParentHide
-        )
+        super().__init__(parent, title, duration, aniType,  lightBgcColor, darkBgcColor)
 
     def _getShowPos(self):
         return QPoint(-self.width(), 0), QPoint(0, 0)
@@ -175,18 +164,10 @@ class RightPopDrawerWidget(PopDrawerWidgetBase):
             title='弹出抽屉',
             duration=250,
             aniType=QEasingCurve.Type.Linear,
-            width=None,
-            height=None,
             lightBgcColor='#ECECEC',
-            darkBgcColor='#202020',
-            xRadius=10,
-            yRyRadius=10,
-            clickParentHide=True
+            darkBgcColor='#202020'
     ):
-        super().__init__(
-            parent, title, duration, aniType, width or 300, height or parent.height(),
-            lightBgcColor, darkBgcColor, xRadius, yRyRadius, clickParentHide
-        )
+        super().__init__(parent, title, duration, aniType, lightBgcColor, darkBgcColor)
 
     def _getShowPos(self):
         parentWidth = self.parent().width()
@@ -218,18 +199,11 @@ class TopPopDrawerWidget(PopDrawerWidgetBase):
             title='弹出抽屉',
             duration=250,
             aniType=QEasingCurve.Type.Linear,
-            width=None,
-            height=None,
             lightBgcColor='#ECECEC',
-            darkBgcColor='#202020',
-            xRadius=10,
-            yRyRadius=10,
-            clickParentHide=True
+            darkBgcColor='#202020'
     ):
-        super().__init__(
-            parent, title, duration, aniType, width or parent.width(), height or 250,
-            lightBgcColor, darkBgcColor, xRadius, yRyRadius, clickParentHide
-        )
+        super().__init__(parent, title, duration, aniType, lightBgcColor, darkBgcColor)
+        self.setDrawerSize(parent.width(), 250)
 
     def _getShowPos(self):
         return QPoint(0, -self.height()), QPoint(0, 0)
@@ -257,18 +231,11 @@ class BottomPopDrawerWidget(PopDrawerWidgetBase):
             title='弹出抽屉',
             duration=250,
             aniType=QEasingCurve.Type.Linear,
-            width=None,
-            height=None,
             lightBgcColor='#ECECEC',
-            darkBgcColor='#202020',
-            xRadius=10,
-            yRyRadius=10,
-            clickParentHide=True
+            darkBgcColor='#202020'
     ):
-        super().__init__(
-            parent, title, duration, aniType, width or parent.width(), height or 250,
-            lightBgcColor, darkBgcColor, xRadius, yRyRadius, clickParentHide
-        )
+        super().__init__(parent, title, duration, aniType, lightBgcColor, darkBgcColor)
+        self.setDrawerSize(parent.width(), 250)
 
     def _getShowPos(self):
         parentHeight = self.parent().height()

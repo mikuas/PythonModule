@@ -1,20 +1,15 @@
 # coding:utf-8
 import sys
 
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication
-from docutils.nodes import title
-from qfluentwidgets import FluentIcon, TitleLabel, PushButton
+from qfluentwidgets import FluentIcon, TitleLabel
 
-from FluentWidgets import SideNavigationWidget, NavigationItemPosition, LabelBarWidget, SegmentedToolNav, PivotNav
+from FluentWidgets import SideNavigationWidget, NavigationItemPosition, LabelBarWidget, SegmentedNav, SegmentedToolNav, PivotNav
 
 
-class NavigationDemo(LabelBarWidget):
+class NavigationDemo(SegmentedNav):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.resize(800, 520)
-
-        self._tabBar.addScrollBarWidget(TitleLabel("TEST", self), Qt.AlignmentFlag.AlignLeft)
 
         self.addSubInterface(
             'HOME',
@@ -28,6 +23,7 @@ class NavigationDemo(LabelBarWidget):
             TitleLabel("GITHUB", self),
             FluentIcon.GITHUB,
         )
+
         self.addSubInterface(
             "SETTING",
             "SETTING",
@@ -45,13 +41,17 @@ class NavigationDemo(LabelBarWidget):
             "MUSIC",
             TitleLabel("MUSIC", self),
             FluentIcon.MUSIC
-        )
+        ).setCurrentItem('HOME')
 
-        self.enableClose()
+        # self.insertNavSeparator(1)
+        # self.insertNavSeparator(3)
+        # self.insertNavSeparator(5)
+        # self.insertNavSeparator(7)
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    demo = NavigationDemo()
-    demo.show()
+    window = NavigationDemo()
+    window.resize(800, 520)
+    window.show()
     sys.exit(app.exec())

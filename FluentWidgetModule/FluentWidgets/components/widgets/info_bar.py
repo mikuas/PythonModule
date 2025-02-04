@@ -1,18 +1,19 @@
 # coding:utf-8
 from enum import Enum
+from typing import Union
 
 from PySide6.QtCore import Qt, QSize, QPropertyAnimation, QPoint, QTimer, QObject, QEvent, Signal
 from PySide6.QtGui import QPainter, QColor
 from PySide6.QtWidgets import QFrame,  QGraphicsOpacityEffect, QWidget
-from qfluentwidgets import BodyLabel, TransparentToolButton, FluentIcon, SubtitleLabel, setTheme, Theme, qconfig
+from qfluentwidgets import BodyLabel, TransparentToolButton, FluentIcon, SubtitleLabel, isDarkTheme
 
 from ...components import VBoxLayout, HBoxLayout
 
 
 class ToastInfoBarColor(Enum):
     """ toast infoBar color """
-    SUCCESS = '#4CAF50'
-    ERROR = '#FF5733'
+    SUCCESS = '#3EC870'
+    ERROR = '#BC0E11'
     WARNING = '#FFEB3B'
     INFO = '#2196F3'
 
@@ -29,9 +30,9 @@ class ToastInfoBarColor(Enum):
 class ToastInfoBarPosition(Enum):
     """ toast infoBar position """
     TOP = 0
-    TOP_LEFT = 1
-    TOP_RIGHT = 2
-    BOTTOM = 3
+    BOTTOM = 1
+    TOP_LEFT = 2
+    TOP_RIGHT = 3
     BOTTOM_LEFT = 4
     BOTTOM_RIGHT = 5
 
@@ -48,16 +49,18 @@ class ToastInfoBar(QFrame):
             duration=2000,
             isClosable=True,
             position=ToastInfoBarPosition.TOP_LEFT,
-            toastColor=ToastInfoBarColor.SUCCESS
+            toastColor: Union[str, QColor, ToastInfoBarColor] = ToastInfoBarColor.SUCCESS,
+            isCustomBgcColor=False,
+            bgcColor: str | QColor = None
     ):
         super().__init__(parent)
-        setTheme(Theme.AUTO)
         self.parent().installEventFilter(self)
         self.setMinimumSize(200, 60)
         self.duration = duration
         self.toastColor = toastColor
         self.position = position
-        self.bgcColor = None
+        self.__isCustomColor = isCustomBgcColor
+        self._bgcColor = QColor(bgcColor)
 
         self.opacityEffect = QGraphicsOpacityEffect(self)
         self.opacityEffect.setOpacity(1)
@@ -76,24 +79,23 @@ class ToastInfoBar(QFrame):
         self.closeButton.setVisible(isClosable)
         self.closeButton.clicked.connect(self.__createOpacityAni)
 
-        self.hBoxLayout.addWidget(self.title, 1, alignment=Qt.AlignmentFlag.AlignLeft)
-        self.hBoxLayout.addWidget(self.closeButton, 1, alignment=Qt.AlignmentFlag.AlignRight)
+        self.hBoxLayout.addWidget(self.title, 1, alignment=Qt.AlignLeft)
+        self.hBoxLayout.addWidget(self.closeButton, 1, alignment=Qt.AlignRight)
         self.vBoxLayout.addWidget(self.content)
 
         self.manager = ToastInfoBarManager.get(self.position)
-
-        self.startPosition, self.endPosition = self.manager.getPos(self)
 
     def adjustSize(self):
         super().adjustSize()
         self.closeButton.adjustSize()
 
     def getBgcColor(self):
-        self.bgcColor = QColor('#202020') if qconfig.theme == Theme.DARK else QColor('#ECECEC')
-        return self.bgcColor
+        if not self.__isCustomColor:
+            self._bgcColor = QColor('#202020') if isDarkTheme() else QColor('#ECECEC')
+        return self._bgcColor
 
     def setBgcColor(self, color: QColor | str):
-        self.bgcColor = QColor(color)
+        self._bgcColor = QColor(color)
 
     def __createPosAni(self):
         self.__geometryAni = QPropertyAnimation(self, b'pos')
@@ -119,9 +121,14 @@ class ToastInfoBar(QFrame):
             duration=2000,
             isClosable=True,
             position=ToastInfoBarPosition.TOP_RIGHT,
-            toastColor=ToastInfoBarColor.SUCCESS
+            toastColor: Union[str, QColor, ToastInfoBarColor] = ToastInfoBarColor.SUCCESS,
+            isCustomBgcColor=False,
+            bgcColor: str | QColor = None
     ):
-        ToastInfoBar(parent, title, content, duration, isClosable, position, toastColor).show()
+        ToastInfoBar(
+            parent, title, content, duration, isClosable,
+            position, toastColor, isCustomBgcColor, bgcColor
+        ).show()
 
     @classmethod
     def success(
@@ -153,14 +160,19 @@ class ToastInfoBar(QFrame):
 
     @classmethod
     def custom(
-            cls, parent: QWidget, title: str, content: str, toastColor: QColor,
-            duration=2000, isClosable=True, position=ToastInfoBarPosition.TOP_RIGHT
+            cls, parent: QWidget, title: str, content: str, toastColor: Union[str, QColor, ToastInfoBarColor],
+            duration=2000, isClosable=True, position=ToastInfoBarPosition.TOP_RIGHT, isCustomBgcColor=False,
+            bgcColor: str | QColor = None
     ):
-        cls.new(parent, title, content, duration, isClosable, position, toastColor)
+        cls.new(
+            parent, title, content, duration, isClosable, position,
+            QColor(toastColor), isCustomBgcColor, bgcColor
+        )
 
     def showEvent(self, event):
         super().showEvent(event)
         self.manager.add(self)
+        self.startPosition, self.endPosition = self.manager.getPos(self)
 
     def hideEvent(self, event):
         super().hideEvent(event)
@@ -168,7 +180,7 @@ class ToastInfoBar(QFrame):
         self.deleteLater()
 
     def eventFilter(self, obj, event):
-        if obj is self.parent() and event.type() == QEvent.Type.Resize:
+        if obj is self.parent() and event.type() in [QEvent.Resize, QEvent.WindowStateChange]:
             self.move(self.manager.getPos(self)[1])
         return super().eventFilter(obj, event)
 
@@ -217,6 +229,11 @@ class ToastInfoBarManager(QObject):
 
     def remove(self, infoBar: ToastInfoBar):
         self.infoBars.remove(infoBar)
+        self.__adjustMove()
+
+    def __adjustMove(self):
+        for bar in self.infoBars:
+            bar.move(self.getPos(bar)[1])
 
     @classmethod
     def register(cls, element):
