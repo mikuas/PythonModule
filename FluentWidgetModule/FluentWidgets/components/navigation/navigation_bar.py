@@ -2,7 +2,7 @@
 from typing import Union
 from enum import Enum
 from PySide6.QtGui import QPainter, QColor, Qt, QIcon, QPen
-from PySide6.QtCore import Signal, QRect,  QEvent
+from PySide6.QtCore import Signal, QRect, QEvent, QPropertyAnimation
 from PySide6.QtWidgets import QWidget
 from qfluentwidgets import isDarkTheme, FluentIcon, Icon, FluentIconBase, themeColor, TransparentToolButton
 
@@ -159,7 +159,7 @@ class NavigationButton(NavigationWidget):
         if self.isExpand:
             painter.setFont(self.font())
             rect = QRect(self._margin, 0, self.width() - 40, self.height())
-            painter.drawText(rect, Qt.AlignVCenter, self._text)
+            painter.drawText(rect, Qt.AlignmentFlag.AlignVCenter, self._text)
 
 
 class NavigationBar(QWidget):
@@ -179,6 +179,7 @@ class NavigationBar(QWidget):
         self._returnButton.setFixedSize(45, 35)
         self._expandButton.setFixedSize(45, 35)
         self._scrollWidget = VerticalScrollWidget(self)
+        self.__expandNavAni = QPropertyAnimation(self, b'maximumWidth')
 
         self.__initScrollWidget()
         self.__initLayout()
@@ -226,8 +227,16 @@ class NavigationBar(QWidget):
         else:
             self._isExpand = True
             width = self._expandWidth
-        self.setFixedWidth(width)
+        self.__createExpandNavAni(width)
         self.__expandAllButton(self._isExpand)
+
+    def __createExpandNavAni(self, endValue):
+        self.__expandNavAni.setDuration(120)
+        self.__expandNavAni.setStartValue(self.width())
+        self.__expandNavAni.setEndValue(endValue)
+        self.__expandNavAni.start()
+        self.__expandNavAni.finished.connect(lambda: self.__expandAllButton(self._isExpand))
+
 
     def enableReturn(self, enable: bool):
         self._returnButton.setVisible(enable)
