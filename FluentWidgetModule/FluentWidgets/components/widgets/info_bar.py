@@ -1,6 +1,6 @@
 # coding:utf-8
 from enum import Enum
-from typing import Union
+from typing import Union, List
 
 from PySide6.QtCore import Qt, QSize, QPropertyAnimation, QPoint, QTimer, QObject, QEvent, Signal
 from PySide6.QtGui import QPainter, QColor
@@ -51,11 +51,14 @@ class ToastInfoBar(QFrame):
             position=ToastInfoBarPosition.TOP_LEFT,
             toastColor: Union[str, QColor, ToastInfoBarColor] = ToastInfoBarColor.SUCCESS,
             isCustomBgcColor=False,
-            bgcColor: str | QColor = None
+            bgcColor: str | QColor = None,
+            width=200,
+            height=60,
+            textColor: List[QColor] = None
     ):
         super().__init__(parent)
-        self.parent().installEventFilter(self)
-        self.setMinimumSize(200, 60)
+        parent.installEventFilter(self)
+        self.setFixedSize(width, height)
         self.duration = duration
         self.toastColor = toastColor
         self.position = position
@@ -79,11 +82,13 @@ class ToastInfoBar(QFrame):
         self.closeButton.setVisible(isClosable)
         self.closeButton.clicked.connect(self.__createOpacityAni)
 
-        self.hBoxLayout.addWidget(self.title, 1, alignment=Qt.AlignLeft)
-        self.hBoxLayout.addWidget(self.closeButton, 1, alignment=Qt.AlignRight)
+        self.hBoxLayout.addWidget(self.title, Qt.AlignLeft)
+        self.hBoxLayout.addWidget(self.closeButton, Qt.AlignRight)
         self.vBoxLayout.addWidget(self.content)
 
         self.manager = ToastInfoBarManager.get(self.position)
+        self.title.setTextColor(*textColor)
+        self.content.setTextColor(*textColor)
 
     def adjustSize(self):
         super().adjustSize()
@@ -118,55 +123,114 @@ class ToastInfoBar(QFrame):
             parent: QWidget,
             title: str,
             content: str,
-            duration=2000,
-            isClosable=True,
-            position=ToastInfoBarPosition.TOP_RIGHT,
-            toastColor: Union[str, QColor, ToastInfoBarColor] = ToastInfoBarColor.SUCCESS,
+            duration: int,
+            isClosable: bool,
+            position: ToastInfoBarPosition,
+            toastColor: Union[str, QColor, ToastInfoBarColor],
             isCustomBgcColor=False,
-            bgcColor: str | QColor = None
+            bgcColor: str | QColor = None,
+            width=200,
+            height=60,
+            textColor: List[QColor] = None
     ):
+        if textColor is None:
+            textColor = (QColor(0, 0, 0), QColor(255, 255, 255))
         ToastInfoBar(
-            parent, title, content, duration, isClosable,
-            position, toastColor, isCustomBgcColor, bgcColor
+            parent, title, content, duration, isClosable, position,
+            toastColor, isCustomBgcColor, bgcColor, width, height, textColor
         ).show()
 
     @classmethod
     def success(
-            cls, parent: QWidget, title: str, content: str,
-            duration=2000, isClosable=True, position=ToastInfoBarPosition.TOP_RIGHT
+            cls,
+            parent: QWidget,
+            title: str,
+            content: str,
+            duration=2000,
+            isClosable=True,
+            position=ToastInfoBarPosition.TOP_RIGHT,
+            width=200,
+            height=60,
+            textColor: List[QColor] = None
     ):
-        cls.new(parent, title, content, duration, isClosable, position, ToastInfoBarColor.SUCCESS.value)
+        cls.new(
+            parent, title, content, duration, isClosable, position, ToastInfoBarColor.SUCCESS.value,
+            width=width, height=height, textColor=textColor
+        )
 
     @classmethod
     def error(
-            cls, parent: QWidget, title: str, content: str,
-            duration=-1, isClosable=True, position=ToastInfoBarPosition.TOP_RIGHT
+            cls,
+            parent: QWidget,
+            title: str,
+            content: str,
+            duration=-1,
+            isClosable=True,
+            position=ToastInfoBarPosition.TOP_RIGHT,
+            width=200,
+            height=60,
+            textColor: List[QColor] = None
     ):
-        cls.new(parent, title, content, duration, isClosable, position, ToastInfoBarColor.ERROR.value)
+        cls.new(
+            parent, title, content, duration, isClosable, position, ToastInfoBarColor.ERROR.value,
+            width=width, height=height, textColor=textColor
+        )
 
     @classmethod
     def warning(
-            cls, parent: QWidget, title: str, content: str,
-            duration=2000, isClosable=True, position=ToastInfoBarPosition.TOP_RIGHT
+            cls,
+            parent: QWidget,
+            title: str,
+            content: str,
+            duration=2000,
+            isClosable=True,
+            position=ToastInfoBarPosition.TOP_RIGHT,
+            width=200,
+            height=60,
+            textColor: List[QColor] = None
     ):
-        cls.new(parent, title, content, duration, isClosable, position, ToastInfoBarColor.WARNING.value)
+        cls.new(
+            parent, title, content, duration, isClosable, position, ToastInfoBarColor.WARNING.value,
+            width=width, height=height, textColor=textColor
+        )
 
     @classmethod
     def info(
-            cls, parent: QWidget, title: str, content: str,
-            duration=2000, isClosable=True, position=ToastInfoBarPosition.TOP_RIGHT
+            cls,
+            parent: QWidget,
+            title: str,
+            content: str,
+            duration=2000,
+            isClosable=True,
+            position=ToastInfoBarPosition.TOP_RIGHT,
+            width=200,
+            height=60,
+            textColor: List[QColor] = None
     ):
-        cls.new(parent, title, content, duration, isClosable, position, ToastInfoBarColor.INFO.value)
+        cls.new(
+            parent, title, content, duration, isClosable, position, ToastInfoBarColor.INFO.value,
+            width=width, height=height, textColor=textColor
+        )
 
     @classmethod
     def custom(
-            cls, parent: QWidget, title: str, content: str, toastColor: Union[str, QColor, ToastInfoBarColor],
-            duration=2000, isClosable=True, position=ToastInfoBarPosition.TOP_RIGHT, isCustomBgcColor=False,
-            bgcColor: str | QColor = None
+            cls,
+            parent: QWidget,
+            title: str,
+            content: str,
+            toastColor: Union[str, QColor, ToastInfoBarColor],
+            duration=2000,
+            isClosable=True,
+            position=ToastInfoBarPosition.TOP_RIGHT,
+            isCustomBgcColor=False,
+            bgcColor: str | QColor = None,
+            width=200,
+            height=60,
+            textColor: List[QColor] = None
     ):
         cls.new(
-            parent, title, content, duration, isClosable, position,
-            QColor(toastColor), isCustomBgcColor, bgcColor
+            parent, title, content, duration, isClosable, position, QColor(toastColor),
+            isCustomBgcColor, bgcColor, width, height, textColor
         )
 
     def showEvent(self, event):
