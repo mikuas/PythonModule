@@ -4,13 +4,11 @@ from enum import Enum
 from PySide6.QtGui import QPainter, QColor, Qt, QIcon, QPen
 from PySide6.QtCore import Signal, QRect,  QEvent
 from PySide6.QtWidgets import QWidget
-from qfluentwidgets import (
-    isDarkTheme, FluentIcon, Icon, FluentIconBase, themeColor, TransparentToolButton
-)
+from qfluentwidgets import isDarkTheme, FluentIcon, Icon, FluentIconBase, themeColor, TransparentToolButton
 
-from ...common import setToolTipInfo, setToolTipInfos
 from ..layout import VBoxLayout
 from ..widgets import VerticalScrollWidget
+from ...common import setToolTipInfo, setToolTipInfos
 
 
 class RouteKeyError(Exception):
@@ -106,8 +104,8 @@ class NavigationSeparator(NavigationWidget):
     def __init__(self, parent=None, color: QColor = None):
         super().__init__(False, parent)
         self.setFixedSize(parent.width() - 20, 1)
-        self.parent = parent
         self.color = color
+        self.parent = parent
         parent.installEventFilter(self)
 
     def eventFilter(self, obj, event):
@@ -161,7 +159,7 @@ class NavigationButton(NavigationWidget):
         if self.isExpand:
             painter.setFont(self.font())
             rect = QRect(self._margin, 0, self.width() - 40, self.height())
-            painter.drawText(rect, Qt.AlignmentFlag.AlignVCenter, self._text)
+            painter.drawText(rect, Qt.AlignVCenter, self._text)
 
 
 class NavigationBar(QWidget):
@@ -218,9 +216,9 @@ class NavigationBar(QWidget):
 
     def __connectSignalSlot(self):
         self._returnButton.clicked.connect(lambda: self.setCurrentItem(self.__updateHistory()))
-        self._expandButton.clicked.connect(self.expandNav)
+        self._expandButton.clicked.connect(self.expandNavigation)
 
-    def expandNav(self):
+    def expandNavigation(self):
         """ expand navigation bar """
         if self._isExpand:
             self._isExpand = False

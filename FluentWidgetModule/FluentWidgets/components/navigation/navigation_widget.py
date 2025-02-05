@@ -1,17 +1,16 @@
 # coding:utf-8
 from typing import Union, List
 
-from PySide6.QtGui import Qt, QIcon, QPainter, QColor, QPen
 from PySide6.QtWidgets import QWidget
-
+from PySide6.QtGui import Qt, QIcon, QPainter, QColor, QPen
 from qfluentwidgets import (
     Pivot, SegmentedWidget, SegmentedToolWidget, SegmentedToggleToolWidget, FluentIconBase, TabBar,
-    TabCloseButtonDisplayMode, PopUpAniStackedWidget, VerticalSeparator
+    TabCloseButtonDisplayMode, VerticalSeparator
 )
 
 from ..layout import VBoxLayout, HBoxLayout
+from ..widgets import Widget, PopUpStackedWidget
 from .navigation_bar import NavigationBar, NavigationItemPosition, RouteKeyError
-from ..widgets import Widget
 
 
 class NavigationBase(Widget):
@@ -19,7 +18,7 @@ class NavigationBase(Widget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.hBoxLayout = HBoxLayout(self)
-        self.stackedWidget = PopUpAniStackedWidget(self)
+        self.stackedWidget = PopUpStackedWidget(parent=self)
         self.navigation = None
 
     def _initLayout(self):
@@ -122,12 +121,7 @@ class SegmentedToolNav(PivotNav):
         self._initLayout()
         self.enableNavCenter()
 
-    def addSubInterface(
-            self,
-            routeKey: str,
-            widget: QWidget,
-            icon: Union[QIcon, str, FluentIconBase] = None
-    ):
+    def addSubInterface(self, routeKey, widget, icon=None):
         self.stackedWidget.addWidget(widget)
         self.navigation.addItem(routeKey, icon, lambda: self.switchTo(widget))
         return self
@@ -151,7 +145,7 @@ class LabelBarWidget(Widget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._tabBar = TabBar(self)
-        self._stackedWidget = PopUpAniStackedWidget(self)
+        self._stackedWidget = PopUpStackedWidget(parent=self)
         self._hLayout = HBoxLayout(self)
         self._vLayout = VBoxLayout()
         self.__items = [] # type: List[QWidget]
@@ -245,7 +239,7 @@ class SideNavigationWidget(Widget):
         self.__widgets = {} # type: dict[str, QWidget]
         self._widgetLayout = HBoxLayout(self)
         self.navigationBar = NavigationBar(self)
-        self._stackedWidget = PopUpAniStackedWidget(self)
+        self._stackedWidget = PopUpStackedWidget(parent=self)
 
         self._widgetLayout.setContentsMargins(0, 0, 0, 0)
         self._widgetLayout.addWidget(self.navigationBar)
@@ -256,8 +250,8 @@ class SideNavigationWidget(Widget):
         self.navigationBar.enableReturn(enable)
         return self
 
-    def expandNav(self):
-        self.navigationBar.expandNav()
+    def expandNavigation(self):
+        self.navigationBar.expandNavigation()
         return self
 
     def switchTo(self, widget: QWidget):

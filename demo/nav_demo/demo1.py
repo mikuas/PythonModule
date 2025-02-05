@@ -34,7 +34,7 @@ class NavigationDemo(SideNavigationWidget):
             TitleLabel("SETTING", self),
             NavigationItemPosition.BOTTOM
         )
-        self.setCurrentWidget('HOME').expandNav().insertSeparator(0, NavigationItemPosition.BOTTOM)
+        self.setCurrentWidget('HOME').insertSeparator(0, NavigationItemPosition.BOTTOM)
 
         self.setBackgroundImg(r"C:\Users\Administrator\OneDrive\Pictures\14.jpg")
         self.setRadius(8, 8)

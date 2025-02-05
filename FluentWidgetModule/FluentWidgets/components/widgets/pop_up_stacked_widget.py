@@ -5,6 +5,7 @@ from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QPoint
 
 
 class StackedPopUpPosition(Enum):
+    """ stacked pop up position """
     BOTTOM_TO_TOP = 0
     TOP_TO_BOTTOM = 1
     LEFT_TO_RIGHT = 2
@@ -21,7 +22,7 @@ class PopUpStackedWidget(QStackedWidget):
             parent=None
     ):
         super().__init__(parent)
-        self.__ani = None # type: QPropertyAnimation
+        self.__posAni = None # type: QPropertyAnimation
         self._aniEase = ease
         self._duration = duration
         self.__startValue = None # type: QPoint
@@ -33,13 +34,13 @@ class PopUpStackedWidget(QStackedWidget):
         if position == StackedPopUpPosition.CUSTOM_POSITION:
             return self.__setPos
         if position == StackedPopUpPosition.BOTTOM_TO_TOP:
-            self.__startValue = QPoint(0, 100)
+            self.__startValue = QPoint(0, 76)
         elif position == StackedPopUpPosition.TOP_TO_BOTTOM:
-            self.__startValue = QPoint(0, -100)
+            self.__startValue = QPoint(0, -76)
         elif position == StackedPopUpPosition.LEFT_TO_RIGHT:
-            self.__startValue = QPoint(-100, 0)
+            self.__startValue = QPoint(-76, 0)
         elif position == StackedPopUpPosition.RIGHT_TO_LEFT:
-            self.__startValue = QPoint(100, 0)
+            self.__startValue = QPoint(76, 0)
 
     def setDuration(self, duration: int):
         self._duration = duration
@@ -53,17 +54,17 @@ class PopUpStackedWidget(QStackedWidget):
         self.setCurrentWidget(w)
 
     def setCurrentWidget(self, w):
-        self.__createAni(w)
+        self.__createPosAni(w)
         super().setCurrentWidget(w)
 
-    def __createAni(self, w):
+    def __createPosAni(self, w):
         if self.currentIndex() == self.indexOf(w):
             return
         self.__currentIndex = self.indexOf(w)
-        self.__ani = QPropertyAnimation(w, b'pos')
-        self.__ani.setDuration(self._duration)
-        self.__ani.setEasingCurve(self._aniEase)
-        self.__ani.setStartValue(self.__startValue)
-        self.__ani.setEndValue(self.__endValue)
-        self.__ani.finished.connect(self.__ani.deleteLater)
-        self.__ani.start()
+        self.__posAni = QPropertyAnimation(w, b'pos')
+        self.__posAni.setDuration(self._duration)
+        self.__posAni.setEasingCurve(self._aniEase)
+        self.__posAni.setStartValue(self.__startValue)
+        self.__posAni.setEndValue(self.__endValue)
+        self.__posAni.finished.connect(self.__posAni.deleteLater)
+        self.__posAni.start()
