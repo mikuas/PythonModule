@@ -228,7 +228,6 @@ class NavigationBar(QWidget):
             self._isExpand = True
             width = self._expandWidth
         self.__createExpandNavAni(width)
-        self.__expandAllButton(self._isExpand)
 
     def __createExpandNavAni(self, endValue):
         self.__expandNavAni.setDuration(120)
@@ -236,7 +235,6 @@ class NavigationBar(QWidget):
         self.__expandNavAni.setEndValue(endValue)
         self.__expandNavAni.start()
         self.__expandNavAni.finished.connect(lambda: self.__expandAllButton(self._isExpand))
-
 
     def enableReturn(self, enable: bool):
         self._returnButton.setVisible(enable)

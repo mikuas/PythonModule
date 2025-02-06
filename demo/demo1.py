@@ -6,7 +6,7 @@ from FluentWidgets import FluentWindow, SplitFluentWindow, MSFluentWindow
 from qfluentwidgets import TitleLabel, FluentIcon, PrimaryPushButton
 
 
-class Window(MSFluentWindow):
+class Window(FluentWindow):
     def __init__(self):
         super().__init__()
         self.resize(1200, 800)
