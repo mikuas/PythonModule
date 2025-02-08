@@ -17,7 +17,6 @@ class Widget(QWidget):
         self._darkBackgroundColor = QColor(32, 32, 32)
         self._lightBackgroundColor = QColor(243, 243, 243)
         self.__transparentBgc = False
-        qconfig.themeChanged.connect(self.update)
 
     def setBackgroundImg(self, image: QImage | str = None):
         """ set background image """
