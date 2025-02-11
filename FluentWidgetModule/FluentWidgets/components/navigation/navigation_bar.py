@@ -159,7 +159,7 @@ class NavigationBar(QWidget):
             raise RouteKeyError('routeKey Are Not Unique')
         item = NavigationButton(icon, text, isSelected, self)
         item.setProperty("routeKey", routeKey)
-        item.EXPAND_WIDTH = self.width() - 20
+        item.EXPAND_WIDTH = self.width() - 8
         self.__items[routeKey] = item
         item.clicked.connect(lambda: self._onClickWidget(item))
         item.clicked.connect(onClick)

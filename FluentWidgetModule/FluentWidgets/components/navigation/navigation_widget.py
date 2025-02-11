@@ -133,11 +133,11 @@ class NavigationButton(NavigationWidget):
         if self.isExpand:
             painter.setFont(self.font())
             rect = QRect(self._margin, 0, self.width() - 40, self.height())
-            painter.drawText(rect, Qt.AlignmentFlag.AlignVCenter, self._text)
+            painter.drawText(rect, Qt.AlignVCenter, self._text)
             self.setFixedWidth(self.EXPAND_WIDTH)
         else:
             self.setFixedWidth(45)
-        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setPen(Qt.NoPen)
         if self.isPressed:
             painter.setOpacity(0.7)
         color = 255 if isDarkTheme() else 0
@@ -146,7 +146,7 @@ class NavigationButton(NavigationWidget):
         painter.drawRoundedRect(self.rect(), 6, 6)
         if self.isSelected:
             painter.drawRoundedRect(self.rect(), 6, 6)
-            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setPen(Qt.NoPen)
             painter.setBrush(self.selectedColor or themeColor())
             painter.drawRoundedRect(0, 5, 5, self.height() - 10, 3, 3)
         painter.drawPixmap(15, (self.height() - self._iconSize) // 2, self._icon.pixmap(self._iconSize))

@@ -30,5 +30,5 @@ from .drawer_widget import (
     PopDrawerWidgetBase, LeftPopDrawerWidget, RightPopDrawerWidget, TopPopDrawerWidget, BottomPopDrawerWidget
 )
 from .info_bar import ToastInfoBar, ToastInfoBarManager, ToastInfoBarPosition, ToastInfoBarColor
-from .custom_widget import Widget
+from .custom_widget import Widget, BlurEffectWidget
 from .pop_up_stacked_widget import StackedPopUpPosition, PopUpStackedWidget

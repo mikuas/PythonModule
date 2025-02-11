@@ -1,9 +1,10 @@
 # coding:utf-8
+import ctypes
 
-from PySide6.QtCore import QRectF
+from PySide6.QtCore import QRectF, QTimer
 from PySide6.QtGui import QColor, QPainter, Qt, QPainterPath, QImage
 from PySide6.QtWidgets import QWidget
-from qfluentwidgets import isDarkTheme, Theme, setTheme, qconfig
+from qfluentwidgets import isDarkTheme, Theme, setTheme
 
 
 class Widget(QWidget):
@@ -76,3 +77,54 @@ class Widget(QWidget):
     def enableTransparentBackground(self, enable: bool):
         self.__transparentBgc = enable
         self.update()
+
+
+class ACCENT_POLICY(ctypes.Structure):
+    _fields_ = [
+        ("AccentState", ctypes.c_int),
+        ("Flags", ctypes.c_int),
+        ("GradientColor", ctypes.c_int),
+        ("AnimationId", ctypes.c_int)
+    ]
+
+class WINDOW_COMPOSITION_ATTRIB_DATA(ctypes.Structure):
+    _fields_ = [
+        ("Attribute", ctypes.c_int),
+        ("Data", ctypes.c_void_p),
+        ("SizeOfData", ctypes.c_size_t)
+    ]
+
+
+class BlurEffectWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.__hwnd = self.winId()  # 获取窗口句柄
+        self.__accent = ACCENT_POLICY()
+        self.__data = WINDOW_COMPOSITION_ATTRIB_DATA()
+        self.__data.Attribute = 19  # WCA_ACCENT_POLICY
+
+        self.__timer = QTimer(self)
+        self.__timer.setSingleShot(True)
+        self.__timer.timeout.connect(self.__enableBlur)  # 延迟启用毛玻璃
+
+    def __enableBlur(self):
+        self.__accent.AccentState = 3  # 3 代表启用毛玻璃
+        self.__accent.GradientColor = 0xCCFFFFFF  # 透明度值（0xCC代表透明度）
+        self.__blur()
+
+    def __disableBlur(self):
+        self.__accent.AccentState = 0  # 0 表示禁用毛玻璃效果
+        self.__accent.GradientColor = 0xCC000000
+        self.__blur()
+
+    def __blur(self):
+        self.__data.Data = ctypes.cast(ctypes.pointer(self.__accent), ctypes.c_void_p)
+        self.__data.SizeOfData = ctypes.sizeof(self.__accent)
+        ctypes.windll.user32.SetWindowCompositionAttribute(self.__hwnd, ctypes.byref(self.__data))
+
+    def resizeEvent(self, event):
+        """开始拖动时禁用毛玻璃效果"""
+        self.__disableBlur()
+        self.__timer.start(120)
+        super().resizeEvent(event)
