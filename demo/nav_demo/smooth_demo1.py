@@ -7,6 +7,7 @@ from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QWidget, QApplication
 from qfluentwidgets import FluentIcon, setTheme, Theme, TransparentToolButton
 
+from PythonModule.FluentWidgetModule.FluentWidgets import WinFluentIcon
 from smooth_switch_widget import SmoothSwitchToolButtonBar
 
 
@@ -25,10 +26,13 @@ class Window(QWidget):
 
         self.t1.addItem('7', FluentIcon.ADD)
         self.t1.addItem('8', FluentIcon.EDIT)
-        self.t1.addItem('9', FluentIcon.HIDE)
+        self.t1.addItem('9', WinFluentIcon.WIFI)
 
         self.layout.addWidget(self.t1)
         self.t1.setCurrentWidget('1')
+
+        self.t1.setItemSelectedColor('blue')
+        self.t1.setItemBackgroundColor('#91b974', '#91b974')
 
 
 if __name__ == '__main__':

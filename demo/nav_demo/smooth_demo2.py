@@ -29,6 +29,9 @@ class Window(QWidget):
         self.layout.addWidget(self.t1)
         self.t1.setCurrentWidget('1')
 
+        self.t1.setItemSelectedColor('blue')
+        self.t1.setItemBackgroundColor('#91b974', '#91b974')
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

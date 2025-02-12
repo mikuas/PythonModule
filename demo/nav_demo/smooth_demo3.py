@@ -15,7 +15,6 @@ class Window(QWidget):
         self.layout = HBoxLayout(self)
         self.layout.setAlignment(Qt.AlignTop)
         self.t1 = SmoothSwitchPushButtonBar(self)
-        self.t1.widgetLayout.setAlignment(Qt.AlignTop)
 
         self.t1.addItem('1', "HOME")
         self.t1.addItem('2', "WIFI")
@@ -29,6 +28,9 @@ class Window(QWidget):
 
         self.layout.addWidget(self.t1)
         self.t1.setCurrentWidget('1')
+
+        self.t1.setItemSelectedColor('blue')
+        self.t1.setItemBackgroundColor('#91b974', '#91b974')
 
 
 if __name__ == '__main__':
