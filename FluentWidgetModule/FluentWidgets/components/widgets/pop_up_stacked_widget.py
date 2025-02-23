@@ -1,6 +1,6 @@
 # coding:utf-8
 from enum import Enum
-from PySide6.QtWidgets import QStackedWidget
+from PySide6.QtWidgets import QStackedWidget, QWidget
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QPoint
 
 
@@ -45,9 +45,14 @@ class PopUpStackedWidget(QStackedWidget):
     def setDuration(self, duration: int):
         self._duration = duration
 
-    def __setPos(self, startValue: QPoint, endValue: QPoint):
-        self.__startValue = startValue
-        self.__endValue = endValue
+    def addWidget(self, w):
+        self.exist(w)
+        super().addWidget(w)
+
+    def exist(self, widget: QWidget):
+        for i in range(self.count()):
+            if self.widget(i) == widget:
+                raise ValueError("widget exist")
 
     def setCurrentIndex(self, index):
         w = self.widget(index)
@@ -56,6 +61,10 @@ class PopUpStackedWidget(QStackedWidget):
     def setCurrentWidget(self, w):
         self.__createPosAni(w)
         super().setCurrentWidget(w)
+
+    def __setPos(self, startValue: QPoint, endValue: QPoint):
+        self.__startValue = startValue
+        self.__endValue = endValue
 
     def __createPosAni(self, w):
         if self.currentIndex() == self.indexOf(w):
