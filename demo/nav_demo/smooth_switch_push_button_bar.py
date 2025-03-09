@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QApplication
 from FluentWidgets import Widget, HBoxLayout, VBoxLayout, HorizontalScrollWidget
 from qfluentwidgets import FluentIcon, ComboBox, PushButton, TitleLabel
 
-from PythonModule.FluentWidgetModule.FluentWidgets import SmoothSwitchPushButtonBar, SmoothSwitchSeparator
+from PythonModule.FluentWidgetModule.FluentWidgets import SmoothSwitchBar
 
 
 class Window(Widget):
@@ -15,51 +15,31 @@ class Window(Widget):
         super().__init__()
         self.setWindowTitle("Smooth Switch Push Button Bar Bar")
         self.widgetLayout = VBoxLayout(self)
-        self.bar = SmoothSwitchPushButtonBar(self)
+        self.bar = SmoothSwitchBar(self)
 
-        # add to scroll
-        self.bar.addItem(
-            "HOME", "HOME", FluentIcon.HOME, isSelected=True
-        )
-        self.bar.addItem(
-            "ABOUT", "ABOUT", FluentIcon.ALBUM, isSelected=True
-        )
-        self.bar.addItem(
-            "GITHUB", "GITHUB", FluentIcon.GITHUB, isSelected=True
-        )
-        self.bar.addItem(
-            "VIDEO", "VIDEO", FluentIcon.VIDEO, isSelected=True
-        )
-        self.bar.addItem(
-            "GAME", "GAME", FluentIcon.GAME, isSelected=True
-        )
-        self.bar.addItem(
-            "SEND", "SEND", FluentIcon.SEND, isSelected=True
-        )
-        self.bar.addItem(
-            "SAVE", "SAVE", FluentIcon.SAVE, isSelected=True
-        )
+        self.texts = []
 
-        # add to top
-        self.bar.addItem(
-            "MUSIC", "MUSIC", FluentIcon.MUSIC
-        )
-        self.bar.addItem(
-            "SETTING", "SETTING", FluentIcon.SETTING)
-        self.bar.addItem(
-            "WIFI", "WIFI", FluentIcon.WIFI)
-        self.bar.addSeparator().setSeparatorColor('deepskyblue')
+        self.icons = [
+            FluentIcon.HOME, FluentIcon.GITHUB, FluentIcon.GAME, FluentIcon.MUSIC, FluentIcon.ADD_TO,
+            FluentIcon.MENU, FluentIcon.COPY, FluentIcon.PASTE, FluentIcon.BROOM, FluentIcon.CAR,
+            FluentIcon.ASTERISK, FluentIcon.CAFE, FluentIcon.BUS, FluentIcon.CLOSE, FluentIcon.ACCEPT,
+            FluentIcon.FLAG, FluentIcon.FOLDER, FluentIcon.DOWN, FluentIcon.RETURN, FluentIcon.CUT,
+            FluentIcon.MUTE, FluentIcon.MAIL, FluentIcon.SCROLL, FluentIcon.SEARCH, FluentIcon.HELP,
+            FluentIcon.HOME_FILL, FluentIcon.SEND, FluentIcon.PLAY, FluentIcon.WIFI, FluentIcon.SETTING
+        ]
 
-        # add to bottom
-        self.bar.addItem(
-            "LINK", "LINK", FluentIcon.LINK)
-        self.bar.addItem(
-            "FOLDER", "FOLDER", FluentIcon.FOLDER)
-        self.bar.addItem(
-            "EDIT", "EDIT", FluentIcon.EDIT)
+        for text in self.icons:
+            self.texts.append(str(text).split('.')[-1])
 
-        self.bar.setItemSelectedColor('deeppink')
-        self.bar.setSmoothLineColor('deeppink')
+        for text, icon in zip(self.texts, self.icons):
+            self.bar.addItem(text, text, icon)
+
+        for i in range(int(len(self.texts) / 5) + 1):
+            self.bar.insertSeparator(i * (5 + 1)).setSeparatorColor('deeppink')
+
+        self.bar.setItemSelectedColor('deepskyblue')
+        self.bar.setSmoothLineColor('deepskyblue')
+        self.bar.setCurrentWidget('HOME')
 
         self.title = TitleLabel("Selected Current RouteKey", self)
 
@@ -74,10 +54,19 @@ class Window(Widget):
             lambda: self.btn.setText(f"Set Current Widget Is {self.comboBox.currentText()}")
         )
 
+        self.currentTitle = TitleLabel(self)
+        self.currentBtn = PushButton("Get Current Widget RouteKey", self)
+        self.currentBtn.clicked.connect(self.updateCurrent)
+
         self.widgetLayout.addWidget(self.bar)
         self.widgetLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignHCenter)
-        self.widgetLayout.addWidgets([self.comboBox, self.btn])
-        self.widgetLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.widgetLayout.addWidgets([self.comboBox, self.btn, self.currentBtn])
+        self.widgetLayout.addWidget(self.currentTitle, alignment=Qt.AlignmentFlag.AlignHCenter)
+
+    def updateCurrent(self):
+        w = self.bar.getCurrentWidget()
+        routeKey = [key for key, value in self.bar.getAllWidget().items() if w == value]
+        self.currentTitle.setText(f'Current RouteKey is "{routeKey[0]}"')
 
     def updateWidget(self):
         self.bar.setCurrentWidget(self.comboBox.currentText())

@@ -79,6 +79,9 @@ if __name__ == '__main__':
             self.widget1 = Widget(self)
             self.widget2 = Widget(self)
 
+            self.widget1.setOpacity(0.8)
+            self.widget2.setOpacity(0.8)
+
             button = PushButton("TOGGLE", self)
             button.clicked.connect(lambda: self.widget1.setBackgroundImg(r"C:\Users\Administrator\OneDrive\Pictures\ide.png"))
             self.layout.addWidget(self.widget1)
@@ -92,7 +95,7 @@ if __name__ == '__main__':
             self.widget2.setBackgroundImg(r"C:\Users\Administrator\OneDrive\Pictures\14.jpg")
 
             self.layout.setContentsMargins(0, 0, 0, 0)
-            self.setOpacity(0.75)
+            self.setOpacity(0.9)
 
     app = QApplication([])
     demo = Demo()

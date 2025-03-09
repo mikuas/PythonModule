@@ -22,54 +22,46 @@ class Window(Widget):
         self.widgetLayout.addWidget(self.bar)
         self.widgetLayout.addLayout(self.box)
 
+        self.icons = [
+            FluentIcon.HOME, FluentIcon.GITHUB, FluentIcon.GAME, FluentIcon.MUSIC, FluentIcon.ADD_TO,
+            FluentIcon.MENU, FluentIcon.COPY, FluentIcon.PASTE, FluentIcon.BROOM, FluentIcon.CAR,
+            FluentIcon.ASTERISK, FluentIcon.CAFE, FluentIcon.BUS, FluentIcon.CLOSE, FluentIcon.ACCEPT,
+            FluentIcon.FLAG, FluentIcon.FOLDER, FluentIcon.DOWN, FluentIcon.RETURN, FluentIcon.CUT,
+            FluentIcon.MUTE, FluentIcon.MAIL, FluentIcon.SCROLL, FluentIcon.SEARCH, FluentIcon.HELP,
+            FluentIcon.HOME_FILL, FluentIcon.SEND, FluentIcon.PLAY, FluentIcon.WIFI, FluentIcon.SETTING
+        ]
+
+        self.topTexts = []
+        self.scrollText = []
+        self.bottomText = []
+
+        for text in self.icons[:5]:
+            self.topTexts.append(str(text).split('.')[-1])
+        print(f"Top Texts {self.topTexts}")
+
+        for text in self.icons[5:25]:
+            self.scrollText.append(str(text).split('.')[-1])
+        print(f"Scroll Texts {self.scrollText}")
+
+        for text in self.icons[25:]:
+            self.bottomText.append(str(text).split('.')[-1])
+        print(f"bottomText Texts {self.bottomText}")
+
         # add to scroll
-        self.bar.addItem(
-            "HOME", FluentIcon.HOME, "HOME", True
-        )
-        self.bar.addItem(
-            "ABOUT", FluentIcon.ALBUM, "ABOUT", True
-        )
-        self.bar.addItem(
-            "GITHUB", FluentIcon.GITHUB, "GITHUB", True
-        )
-        self.bar.addItem(
-            "VIDEO", FluentIcon.VIDEO, "VIDEO", True
-        )
-        self.bar.addItem(
-            "GAME", FluentIcon.GAME, "GAME", True
-        )
-        self.bar.addItem(
-            "SEND", FluentIcon.SEND, "SEND", True
-        )
-        self.bar.addItem(
-            "SAVE", FluentIcon.SAVE, "SAVE", True
-        )
+        for text, icon in zip(self.topTexts, self.icons[:5]):
+            self.bar.addItem(text, icon, text, position=NavigationItemPosition.TOP)
+        self.bar.addSeparator()
 
         # add to top
-        self.bar.addItem(
-            "MUSIC", FluentIcon.MUSIC, "MUSIC", position=NavigationItemPosition.TOP
-        )
-        self.bar.addItem(
-            "SETTING", FluentIcon.SETTING, "SETTING", position=NavigationItemPosition.TOP
-        )
-        self.bar.addItem(
-            "WIFI", FluentIcon.WIFI, "WIFI", position=NavigationItemPosition.TOP
-        )
-        self.bar.addSeparator(NavigationItemPosition.TOP).setSeparatorColor('deepskyblue')
+        for text, icon in zip(self.scrollText, self.icons[5:25]):
+            self.bar.addItem(text, icon, text)
 
         # add to bottom
-        self.bar.addSeparator(NavigationItemPosition.BOTTOM).setSeparatorColor('deeppink')
-        self.bar.addItem(
-            "LINK", FluentIcon.LINK, "LINK", position=NavigationItemPosition.BOTTOM
-        )
-        self.bar.addItem(
-            "FOLDER", FluentIcon.FOLDER, "FOLDER", position=NavigationItemPosition.BOTTOM
-        )
-        self.bar.addItem(
-            "EDIT", FluentIcon.EDIT, "EDIT", position=NavigationItemPosition.BOTTOM
-        )
+        self.bar.addSeparator(NavigationItemPosition.BOTTOM)
+        for text, icon in zip(self.bottomText, self.icons[25:]):
+            self.bar.addItem(text, icon, text, position=NavigationItemPosition.BOTTOM)
 
-        # self.bar.setCurrentWidget("HOME")
+        self.bar.setCurrentWidget("HOME")
 
         self.title = TitleLabel("Selected Current RouteKey", self)
 
@@ -85,17 +77,17 @@ class Window(Widget):
         )
 
         self.currentBtn = PushButton("Get Current Widget RouteKey", self)
-        # self.currentBtn.clicked.connect()
+        self.currentBtn.clicked.connect(self.updateCurrent)
         self.currentTitle = TitleLabel(self)
 
         self.box.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.box.addWidgets([self.comboBox, self.btn, self.currentBtn])
         self.box.addWidget(self.currentTitle, alignment=Qt.AlignmentFlag.AlignHCenter)
-        self.box.setAlignment(Qt.AlignmentFlag.AlignTop)
 
     def updateCurrent(self):
-        # self.title.setText(self.box.get)
-        pass
+        w = self.bar.getCurrentWidget()
+        routeKey = [key for key, value in self.bar.getAllWidget().items() if w == value]
+        self.currentTitle.setText(f'Current RouteKey is "{routeKey[0]}"')
 
     def updateWidget(self):
         self.bar.setCurrentWidget(self.comboBox.currentText())
@@ -104,6 +96,6 @@ class Window(Widget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = Window()
-    window.resize(800, 520)
+    window.resize(1000, 520)
     window.show()
     sys.exit(app.exec())
