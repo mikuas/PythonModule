@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: FluentWidgets
+Version: 0.0.5
+Author: Mikuas
+Author-email: email@example.com
+Requires-Dist: PySide6>=6.4.2
+Requires-Dist: PySide6-Fluent-Widgets[full]
+Dynamic: author
+Dynamic: author-email
+Dynamic: requires-dist

@@ -1,0 +1,4 @@
+pyautogui
+comtypes
+pycaw
+wmi
