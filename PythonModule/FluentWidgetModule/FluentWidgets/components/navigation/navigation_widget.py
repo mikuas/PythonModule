@@ -1,5 +1,4 @@
 # coding:utf-8
-# coding:utf-8
 from typing import Union, List
 
 from PySide6.QtCore import (

@@ -57,7 +57,7 @@ class TextWrap:
     @lru_cache(maxsize=32)
     def split_long_token(cls, token: str, width: int) -> List[str]:
         """Split long token into smaller chunks."""
-        return [token[i: i + width] for i in range(0, len(token), width)]
+        return [token[i : i + width] for i in range(0, len(token), width)]
 
     @classmethod
     def tokenizer(cls, text: str):
@@ -115,7 +115,7 @@ class TextWrap:
                 wrapped_lines.append(wrapped_line)
 
                 if once:
-                    wrapped_lines.append(text[len(wrapped_line):].rstrip())
+                    wrapped_lines.append(text[len(wrapped_line) :].rstrip())
                     return "".join(wrapped_lines), is_wrapped
 
             else:

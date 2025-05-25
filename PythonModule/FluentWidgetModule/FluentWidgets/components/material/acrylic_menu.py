@@ -4,8 +4,8 @@ from PySide6.QtGui import QPainter, QColor, QPainterPath
 from PySide6.QtWidgets import QLineEdit, QListWidgetItem, QListWidget
 
 from ..widgets.menu import (
-    RoundMenu, MenuAnimationType, MenuAnimationManager, MenuActionListWidget,
-    IndicatorMenuItemDelegate, LineEditMenu, MenuIndicatorType, CheckableMenu
+    RoundMenu, MenuAnimationType, MenuAnimationManager, MenuActionListWidget, IndicatorMenuItemDelegate,
+    LineEditMenu, MenuIndicatorType, CheckableMenu
 )
 from ..widgets.line_edit import CompleterMenu, LineEdit
 from ..widgets.acrylic_label import AcrylicBrush
@@ -141,6 +141,10 @@ class AcrylicCompleterMenu(AcrylicMenuBase, CompleterMenu):
         self.view.setItemDelegate(IndicatorMenuItemDelegate())
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setItemHeight(33)
+
+    def _onItemClicked(self, item):
+        self._hideMenu(False)
+        self._onCompletionItemSelected(item.text(), self.view.row(item)-1)
 
     def exec(self, pos, ani=True, aniType=MenuAnimationType.DROP_DOWN):
         return super().exec(pos, ani, aniType)

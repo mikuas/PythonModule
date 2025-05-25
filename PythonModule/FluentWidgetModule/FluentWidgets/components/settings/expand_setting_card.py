@@ -8,6 +8,7 @@ from ...common.config import isDarkTheme
 from ...common.icon import FluentIcon as FIF
 from ...common.style_sheet import FluentStyleSheet
 from .setting_card import SettingCard
+from ..layout.v_box_layout import VBoxLayout
 
 
 class ExpandButton(QAbstractButton):
@@ -24,7 +25,8 @@ class ExpandButton(QAbstractButton):
 
     def paintEvent(self, e):
         painter = QPainter(self)
-        painter.setRenderHints(QPainter.Antialiasing |QPainter.SmoothPixmapTransform)
+        painter.setRenderHints(QPainter.Antialiasing |
+                               QPainter.SmoothPixmapTransform)
         painter.setPen(Qt.NoPen)
 
         # draw background
@@ -191,6 +193,8 @@ class ExpandBorderWidget(QWidget):
             painter.drawLine(1, ch, w - 1, ch)
 
 
+
+
 class ExpandSettingCard(QScrollArea):
     """ Expandable setting card """
 
@@ -296,6 +300,7 @@ class ExpandSettingCard(QScrollArea):
     def setValue(self, value):
         """ set the value of config item """
         pass
+
 
 
 class GroupSeparator(QWidget):

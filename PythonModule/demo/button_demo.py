@@ -5,13 +5,13 @@ from typing import Union
 from FluentWidgets.common.icon import toQIcon
 from PySide6.QtCore import QSize, Signal
 from PySide6.QtGui import QIcon, QPainter, QColor, QPen, Qt, QFontMetrics
-from PySide6.QtWidgets import QPushButton, QToolButton, QWidget
+from PySide6.QtWidgets import QPushButton, QToolButton, QWidget, QAbstractButton
 
 from FluentWidgets.common.overload import singledispatchmethod
 from FluentWidgets import setFont, FluentIconBase, themeColor, isDarkTheme, qconfig, FluentIcon, setThemeColor
 
 
-class OutlinePushButton(QPushButton):
+class OutlinePushButton(QAbstractButton):
     """ Outline PushButton
 
     Constructors
@@ -26,14 +26,13 @@ class OutlinePushButton(QPushButton):
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        self.__isChecked = False
         self.__isHover = False
         self.__isPressed = False
         self.__outlineColor = None # type: QColor
         self.setFixedHeight(35)
         self.setIconSize(QSize(16, 16))
-        self.setStyleSheet("QPushButton {border-radius: 16px;}")
-        self.clicked.connect(lambda: self.setChecked(not self.__isChecked))
+        self.setCheckable(True)
+        self.toggled.connect(lambda b: self.setChecked(b))
         setFont(self)
 
         qconfig.themeColorChanged.connect(self.update)
@@ -84,12 +83,9 @@ class OutlinePushButton(QPushButton):
         self.__isPressed = False
 
     def setChecked(self, isChecked: bool):
-        self.__isChecked = isChecked
-        self.checkedChange.emit(self.__isChecked)
+        super().setChecked(isChecked)
+        self.checkedChange.emit(isChecked)
         self.update()
-
-    def isChecked(self):
-        return self.__isChecked
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -139,7 +135,8 @@ if __name__ == '__main__':
 
             self.button = OutlinePushButton(FluentIcon.SETTING, 'change', self)
             self.button.checkedChange.connect(lambda b: {
-                setThemeColor(QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) if b else None
+                setThemeColor(QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))) if b else None,
+                print(self.button.isChecked())
             })
             self.hLayout.addWidget(self.button)
 

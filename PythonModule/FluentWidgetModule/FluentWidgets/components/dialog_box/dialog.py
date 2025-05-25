@@ -9,8 +9,9 @@ from ...common.style_sheet import FluentStyleSheet
 from ..widgets.button import PrimaryPushButton
 from ..widgets.label import BodyLabel, SubtitleLabel
 from ..widgets.line_edit import LineEdit
-from .message_box_base import MessageBoxBase
+
 from .mask_dialog_base import MaskDialogBase
+from .message_box_base import MessageBoxBase
 
 
 class Ui_MessageBox:
@@ -194,19 +195,15 @@ class CustomDialog(MessageBoxBase):
 
     def addWidget(self, widget: QWidget, stretch=0, alignment=Qt.AlignmentFlag(0)):
         self.viewLayout.addWidget(widget, stretch, alignment)
-        return self
 
     def setFixedWidth(self, width: int):
         self.widget.setFixedWidth(width)
-        return self
 
     def setFixedHeight(self, height: int):
         self.widget.setFixedHeight(height)
-        return self
 
     def setFixedSize(self, width: int, height: int):
         self.widget.setFixedSize(width, height)
-        return self
 
     def width(self):
         return self.widget.width()

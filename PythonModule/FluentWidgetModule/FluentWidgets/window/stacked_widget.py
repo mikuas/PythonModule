@@ -1,8 +1,9 @@
 # coding:utf-8
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QEasingCurve
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QAbstractScrollArea
 
-from ..widgets import PopUpStackedWidget
+from ..components.widgets.stacked_widget import PopUpAniStackedWidget
+
 
 
 class StackedWidget(QFrame):
@@ -13,7 +14,7 @@ class StackedWidget(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.hBoxLayout = QHBoxLayout(self)
-        self.view = PopUpStackedWidget(self)
+        self.view = PopUpAniStackedWidget(self)
 
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.hBoxLayout.addWidget(self.view)
@@ -32,14 +33,18 @@ class StackedWidget(QFrame):
     def widget(self, index: int):
         return self.view.widget(index)
 
-    def setCurrentWidget(self, widget):
+    def setCurrentWidget(self, widget, popOut=True):
         if isinstance(widget, QAbstractScrollArea):
             widget.verticalScrollBar().setValue(0)
 
-        self.view.setCurrentWidget(widget)
+        if not popOut:
+            self.view.setCurrentWidget(widget, duration=300)
+        else:
+            self.view.setCurrentWidget(
+                widget, True, False, 200, QEasingCurve.InQuad)
 
-    def setCurrentIndex(self, index):
-        self.setCurrentWidget(self.view.widget(index))
+    def setCurrentIndex(self, index, popOut=True):
+        self.setCurrentWidget(self.view.widget(index), popOut)
 
     def currentIndex(self):
         return self.view.currentIndex()

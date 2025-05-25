@@ -2,7 +2,7 @@
 from typing import Union, Dict, List
 from PySide6.QtGui import QPainter, QColor, Qt, QIcon, QFont
 from PySide6.QtCore import QPropertyAnimation, QTimer, QPoint, QEvent, Property, QRectF, QRect
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy
+from PySide6.QtWidgets import QWidget, QVBoxLayout
 
 from ..layout import VBoxLayout, HBoxLayout
 from ..widgets import (

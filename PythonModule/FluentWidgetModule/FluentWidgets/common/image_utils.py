@@ -13,7 +13,7 @@ from scipy.ndimage.filters import gaussian_filter
 from .exception_handler import exceptionHandler
 
 
-def gaussianBlur(image, blurRadius=18, brightFactor=1, blurPicSize=None):
+def gaussianBlur(image, blurRadius=18, brightFactor=1, blurPicSize= None):
     if isinstance(image, str) and not image.startswith(':'):
         image = Image.open(image)
     else:

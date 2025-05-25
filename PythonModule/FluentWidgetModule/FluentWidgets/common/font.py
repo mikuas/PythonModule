@@ -1,8 +1,9 @@
-# coding:utf-8
+# coding: utf-8
 from typing import List
 
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QWidget
+
 
 def setFont(widget: QWidget, fontSize=14, weight=QFont.Normal):
     """ set the font of widget
@@ -19,11 +20,6 @@ def setFont(widget: QWidget, fontSize=14, weight=QFont.Normal):
         font weight
     """
     widget.setFont(getFont(fontSize, weight))
-
-def setFonts(widgets: List[QWidget], fontSize: int, weight: QFont.Weight = QFont.Weight.Normal):
-    """ set widget font size """
-    for widget in widgets:
-        setFont(widget, fontSize, weight)
 
 def getFont(fontSize=14, weight=QFont.Normal):
     """ create font

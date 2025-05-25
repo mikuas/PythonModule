@@ -1,6 +1,7 @@
 # coding:utf-8
 from copy import deepcopy
 
+
 def exceptionHandler(*default):
     """ decorator for exception handling
 
