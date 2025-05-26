@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout
 
 from ...common.style_sheet import FluentStyleSheet
 from ...common.font import setFont
-from ..layout import ExpandLayout
+from ..layout.expand_layout import ExpandLayout
 
 
 class SettingCardGroup(QWidget):

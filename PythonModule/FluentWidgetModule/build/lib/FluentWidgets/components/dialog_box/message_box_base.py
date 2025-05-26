@@ -15,7 +15,7 @@ class MessageBoxBase(MaskDialogBase):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.buttonGroup = QFrame(self.widget)
-        self.yesButton = PrimaryPushButton(self.tr('Ok'), self.buttonGroup)
+        self.yesButton = PrimaryPushButton(self.tr('OK'), self.buttonGroup)
         self.cancelButton = QPushButton(self.tr('Cancel'), self.buttonGroup)
 
         self.vBoxLayout = QVBoxLayout(self.widget)

@@ -1,6 +1,4 @@
 # coding: utf-8
-from typing import List
-
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QWidget
 

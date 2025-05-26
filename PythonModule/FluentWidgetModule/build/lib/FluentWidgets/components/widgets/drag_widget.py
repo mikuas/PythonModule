@@ -4,7 +4,7 @@ from PySide6.QtGui import QPainter, QPen, QColor
 from PySide6.QtWidgets import QFileDialog, QWidget, QLabel
 
 from ..layout import VBoxLayout
-from ...common import setFonts
+from ...common import setFont
 from ..widgets import HyperlinkButton
 
 
@@ -29,7 +29,8 @@ class DragFolderWidget(QWidget):
         self.orLabel = QLabel("或", self)
 
         self.button = HyperlinkButton('', "选择文件夹", self)
-        setFonts([self.button, self.label, self.orLabel], 15)
+        for w in [self.button, self.label, self.orLabel]:
+            setFont(w, 15)
 
         self.vBoxLayout.addWidgets([self.label, self.orLabel, self.button])
         self.vBoxLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)

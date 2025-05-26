@@ -1,20 +1,18 @@
 # coding:utf-8
 from typing import Union, List
 
-from PySide6.QtCore import (
-    Qt, Signal, QRect, QRectF, QPropertyAnimation, Property,
-    QMargins, QEasingCurve, QPoint, QEvent, QTimer
-)
-from PySide6.QtGui import QColor, QPainter, QPen, QIcon, QCursor, QFont, QPixmap, QImage, QFontMetrics
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QFrame
+from PySide6.QtCore import (Qt, Signal, QRect, QRectF, QPropertyAnimation, Property, QMargins,
+                          QEasingCurve, QPoint, QEvent)
+from PySide6.QtGui import QColor, QPainter, QPen, QIcon, QCursor, QFont, QBrush, QPixmap, QImage
+from PySide6.QtWidgets import QWidget, QVBoxLayout
 from collections import deque
 
 from ...common.config import isDarkTheme
 from ...common.style_sheet import themeColor
-from ...common.icon import drawIcon, toQIcon, FluentIconBase, Icon, FluentIcon
+from ...common.icon import drawIcon, toQIcon
 from ...common.icon import FluentIcon as FIF
+from ...common.color import autoFallbackThemeColor
 from ...common.font import setFont
-from ..widgets import Widget
 from ..widgets.scroll_area import ScrollArea
 from ..widgets.label import AvatarWidget
 from ..widgets.info_badge import InfoBadgeManager, InfoBadgePosition
@@ -130,6 +128,8 @@ class NavigationPushButton(NavigationWidget):
 
         self._icon = icon
         self._text = text
+        self.lightIndicatorColor = QColor()
+        self.darkIndicatorColor = QColor()
 
         setFont(self)
 
@@ -153,6 +153,11 @@ class NavigationPushButton(NavigationWidget):
     def _canDrawIndicator(self):
         return self.isSelected
 
+    def setIndicatorColor(self, light, dark):
+        self.lightIndicatorColor = QColor(light)
+        self.darkIndicatorColor = QColor(dark)
+        self.update()
+
     def paintEvent(self, e):
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing |
@@ -175,7 +180,7 @@ class NavigationPushButton(NavigationWidget):
             painter.drawRoundedRect(self.rect(), 5, 5)
 
             # draw indicator
-            painter.setBrush(themeColor())
+            painter.setBrush(autoFallbackThemeColor(self.lightIndicatorColor, self.darkIndicatorColor))
             painter.drawRoundedRect(pl, 10, 3, 16, 1.5, 1.5)
         elif self.isEnter and self.isEnabled() and globalRect.contains(QCursor.pos()):
             painter.setBrush(QColor(c, c, c, 10))
@@ -406,7 +411,13 @@ class NavigationTreeWidget(NavigationTreeWidgetBase):
 
     def setTextColor(self, light, dark):
         """ set the text color in light/dark theme mode """
+        self.lightTextColor = QColor(light)
+        self.darkTextColor = QColor(dark)
         self.itemWidget.setTextColor(light, dark)
+
+    def setIndicatorColor(self, light, dark):
+        """ set the indicator color in light/dark theme mode """
+        self.itemWidget.setIndicatorColor(light, dark)
 
     def setFont(self, font: QFont):
         super().setFont(font)
@@ -416,6 +427,8 @@ class NavigationTreeWidget(NavigationTreeWidgetBase):
         root = NavigationTreeWidget(self._icon, self.text(), self.isSelectable, self.parent())
         root.setSelected(self.isSelected)
         root.setFixedSize(self.size())
+        root.setTextColor(self.lightTextColor, self.darkTextColor)
+        root.setIndicatorColor(self.itemWidget.lightIndicatorColor, self.itemWidget.darkIndicatorColor)
         root.nodeDepth = self.nodeDepth
 
         root.clicked.connect(self.clicked)
@@ -671,347 +684,3 @@ class NavigationFlyoutMenu(ScrollArea):
             queue.extend([i for i in node.treeChildren if not i.isHidden()])
 
         return nodes
-
-#################################################################
-
-class NavigationWidgetBase(Widget):
-    clicked = Signal()
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.isHover = False
-        self.isSelected = False
-
-    def setSelectedColor(self, color: QColor | str):
-        raise NotImplementedError
-
-    def setSelected(self, isSelected: bool):
-        self.isSelected = isSelected
-
-    def click(self):
-        self.clicked.emit()
-
-
-class ExpandNavigationWidget(NavigationWidgetBase):
-    """ navigation widget """
-    EXPAND_WIDTH = 328
-
-    def __init__(self, isSelected=False, parent=None):
-        super().__init__(parent)
-        self.isEnter = False
-        self.isPressed = False
-        self.isExpand = False
-        self.selectedColor = None
-        self.isSelected = isSelected
-        self.setFixedSize(50, 35)
-
-    def setSelectedColor(self, color):
-        """ set current selected widget color """
-        self.selectedColor = QColor(color)
-
-    def setExpend(self, isExpand: bool):
-        """ set expand widget """
-        self.isExpand = isExpand
-        self.update()
-
-    def setSelected(self, selected):
-        super().setSelected(selected)
-        self.update()
-
-    def enterEvent(self, event):
-        super().enterEvent(event)
-        self.isEnter = True
-        self.update()
-
-    def leaveEvent(self, event):
-        super().leaveEvent(event)
-        self.isEnter = False
-        self.isPressed = False
-        self.update()
-
-    def mousePressEvent(self, event):
-        super().mousePressEvent(event)
-        self.isPressed = True
-        self.update()
-
-    def mouseReleaseEvent(self, event):
-        super().mouseReleaseEvent(event)
-        self.isEnter = False
-        self.isPressed = False
-        self.clicked.emit()
-        self.update()
-
-
-class SmoothWidget(NavigationWidgetBase):
-    """ Smooth Switch Widget """
-    clicked = Signal(QWidget)
-    hoverSignal = Signal(QWidget)
-    leaveSignal = Signal(QWidget)
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.isSelected = False
-        self._xRadius = 8
-        self._yRadius = 8
-        self._selectedColor = None
-        self._itemColor = [QColor(0, 0, 0), QColor(255, 255, 255)]
-
-    def _setItemColor(self, light=QColor(0, 0, 0), dark=QColor(255, 255, 255)):
-        self._itemColor = [QColor(light), QColor(dark)]
-        self.update()
-
-    def setSelectedColor(self, color):
-        """ set selected/hover color of current widget """
-        self._selectedColor = QColor(color)
-
-    def getItemColor(self):
-        return self._itemColor[1] if isDarkTheme() else self._itemColor[0]
-
-    def setText(self, text: str):
-        self._text = text
-        self.update()
-
-    def setIcon(self, icon):
-        self._icon = icon
-        self.update()
-
-    def setIconSize(self, size: int):
-        self._iconSize = size
-        self.update()
-
-    def setSelected(self, isSelected):
-        super().setSelected(isSelected)
-        self.updateSelectedColor(isSelected)
-
-    def updateSelectedColor(self, update=False):
-        if update:
-            c = self._selectedColor or themeColor()
-            self._setItemColor(c, c)
-        else:
-            self._setItemColor()
-
-    def enterEvent(self, event):
-        super().enterEvent(event)
-        self.isHover = True
-        self.hoverSignal.emit(self)
-
-    def leaveEvent(self, event):
-        super().leaveEvent(event)
-        self.isHover = False
-        self.leaveSignal.emit(self)
-
-    def mouseReleaseEvent(self, event):
-        super().mouseReleaseEvent(event)
-        self.clicked.emit(self)
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
-        painter.setPen(Qt.NoPen)
-        # drawer background color
-        painter.setBrush(self.getBackgroundColor())
-        painter.drawRoundedRect(self.rect(), self.getXRadius(), self.getYRadius())
-
-
-class ExpandNavigationSeparator(ExpandNavigationWidget):
-    """ navigation separator """
-    def __init__(self, parent=None):
-        super().__init__(False, parent)
-        self.setFixedSize(parent.width() - 20, 1)
-        self.color = None
-        self.parent = parent
-        parent.installEventFilter(self)
-
-    def setSeparatorColor(self, color: str | QColor):
-        self.color = QColor(color)
-        self.update()
-
-    def eventFilter(self, obj, event):
-        if obj is self.parent and event.type() in [QEvent.Resize, QEvent.WindowStateChange]:
-            self.setFixedSize(self.parent.width() - 20, 1)
-            self.update()
-        return super().eventFilter(obj, event)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        color = 255 if isDarkTheme() else 0
-        painter.setPen(QPen(self.color or QColor(color, color, color, 128)))
-        painter.drawLine(0, 1, self.width(), 1)
-
-
-class SmoothSeparator(QWidget):
-    """ Smooth Switch Separator """
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setFixedWidth(6)
-        self.color = None
-
-    def setSeparatorColor(self, color: str | QColor):
-        self.color = QColor(color)
-        self.update()
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        color = 255 if isDarkTheme() else 0
-        pen = QPen(self.color or QColor(color, color, color, 128), 3)
-        pen.setCapStyle(Qt.RoundCap)
-        painter.setPen(pen)
-        painter.drawLine(2, 10, 2, self.height() - 10)
-
-
-class SmoothSwitchLine(QFrame):
-
-    """ Smooth Switch Line """
-    def __init__(self, parent=None, color: QColor = None, height=4):
-        super().__init__(parent)
-        self.setFixedHeight(height)
-        self.hide()
-        self.__color = color or themeColor()
-
-    def setLineColor(self, color: QColor | str):
-        self.__color = QColor(color)
-        self.update()
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        painter = QPainter(self)
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setBrush(self.__color)
-        painter.drawRoundedRect(self.rect(), 2, 2)
-
-
-class ExpandNavigationButton(ExpandNavigationWidget):
-    """ navigation button widget """
-    def __init__(self, icon: Union[str, QIcon, FluentIconBase], text='', isSelected=False, parent=None):
-        super().__init__(isSelected, parent)
-        self._icon = Icon(icon)
-        self._text = text
-        self._iconSize = 16
-        self._margin = 45
-
-    def setIconSize(self, size: int):
-        self._iconSize = size
-        self.update()
-
-    def setText(self, text: str):
-        self._text = text
-        self.update()
-
-    def setIcon(self, icon: Union[str, QIcon, FluentIconBase]):
-        self._icon = Icon(icon)
-        self.update()
-
-    def setTextMargin(self, margin: int):
-        self._margin = margin
-        self.update()
-
-    def getText(self):
-        return self._text
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
-        if self.isExpand:
-            painter.setFont(self.font())
-            rect = QRect(self._margin, 0, self.width() - 40, self.height())
-            painter.drawText(rect, Qt.AlignVCenter, self._text)
-            self.setFixedWidth(self.EXPAND_WIDTH)
-        else:
-            self.setFixedWidth(45)
-        painter.setPen(Qt.NoPen)
-        if self.isPressed:
-            painter.setOpacity(0.7)
-        color = 255 if isDarkTheme() else 0
-        if self.isEnter or self.isSelected:
-            painter.setBrush(QColor(color, color, color, 10))
-        painter.drawRoundedRect(self.rect(), 6, 6)
-        if self.isSelected:
-            painter.drawRoundedRect(self.rect(), 6, 6)
-            painter.setPen(Qt.NoPen)
-            painter.setBrush(self.selectedColor or themeColor())
-            painter.drawRoundedRect(0, 5, 5, self.height() - 10, 3, 3)
-        painter.drawPixmap(15, (self.height() - self._iconSize) // 2, self._icon.pixmap(self._iconSize))
-
-
-class SmoothSwitchToolButton(SmoothWidget):
-    def __init__(self, icon: FluentIcon, parent=None):
-        super().__init__(parent)
-        self.setMinimumSize(50, 35)
-        self._icon = icon
-        self._iconSize = 16
-
-    def updateSelectedColor(self, update=False):
-        if update:
-            c = self._selectedColor or themeColor()
-            self._setItemColor(c, c)
-            icon = self._icon.colored(c, c)
-        else:
-            self._setItemColor()
-            icon = self._icon.colored(*self._itemColor)
-        self._icon = icon
-        self.update()
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
-        painter.setPen(Qt.NoPen)
-        x = (self.width() - self._iconSize) / 2
-        y = (self.height() - self._iconSize) / 2
-        drawIcon(Icon(self._icon), painter, QRect(x, y, self._iconSize, self._iconSize))
-
-
-class SmoothSwitchPushButton(SmoothWidget):
-    def __init__(self, text: str, icon: FluentIcon = None, parent=None):
-        super().__init__(parent)
-        self._text = text
-        self._icon = icon
-        self._iconSize = 16
-        self.setMinimumSize(
-            QFontMetrics(self.font()).horizontalAdvance(self._text) + 32 + self._iconSize,
-            35
-        )
-
-    def updateSelectedColor(self, update=False):
-        if update:
-            c = self._selectedColor or themeColor()
-            self._setItemColor(c, c)
-            c = [c, c]
-        else:
-            self._setItemColor()
-            c = self._itemColor
-        if self._icon:
-            self._icon = self._icon.colored(*c)
-        self.update()
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
-        painter.setPen(Qt.NoPen)
-
-        rect = self.rect()
-        align = Qt.AlignCenter
-        fm = QFontMetrics(self._text)
-        w = self.width()
-        textWidth = fm.horizontalAdvance(self._text)
-        w = (w - textWidth - self._iconSize) / 2
-
-        # draw icon
-        if self._icon:
-            drawIcon(
-                Icon(self._icon), painter,
-                QRect(w, (self.height() - self._iconSize) / 2, self._iconSize, self._iconSize)
-            )
-            rect.adjust(w + self._iconSize + 10, 0, 0, 0)
-            align = Qt.AlignVCenter
-
-        # draw text
-        painter.setPen(self.getItemColor())
-        painter.drawText(rect, align, self._text)

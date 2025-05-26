@@ -2,8 +2,10 @@
 import os
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QMouseEvent, QPainter, QPen, QPixmap
-from PySide6.QtWidgets import QApplication, QFileDialog, QHBoxLayout, QLabel, QVBoxLayout, QWidget, QPushButton
+from PySide6.QtGui import (QBrush, QColor, QFont, QFontMetrics, QMouseEvent,
+                         QPainter, QPen, QPixmap)
+from PySide6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
+                             QVBoxLayout, QWidget, QPushButton)
 
 from ...common.config import isDarkTheme
 from ...common.icon import getIconColor

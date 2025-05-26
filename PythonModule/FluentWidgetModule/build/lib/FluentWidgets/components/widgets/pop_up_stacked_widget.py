@@ -3,8 +3,6 @@ from enum import Enum
 from PySide6.QtWidgets import QStackedWidget, QWidget
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QPoint
 
-from ...common import qconfig, isDarkTheme
-
 
 class StackedPopUpPosition(Enum):
     """ stacked pop up position """

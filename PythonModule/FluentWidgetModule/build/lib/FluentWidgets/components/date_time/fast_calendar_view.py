@@ -1,5 +1,6 @@
 # coding: utf-8
 from math import ceil
+from collections import defaultdict, Counter
 from typing import Type
 
 from PySide6.QtCore import Qt, Signal, QSize, QDate, QCalendar, QLocale
@@ -10,7 +11,8 @@ from ..widgets.flyout import FlyoutViewBase
 from ...common.style_sheet import isDarkTheme, themeColor, ThemeColor
 
 
-from .calendar_view import ScrollItemDelegate, ScrollViewBase, CalendarViewBase
+from .calendar_view import (ScrollItemDelegate, ScrollViewBase,
+                            CalendarViewBase)
 
 
 class FastScrollItemDelegate(ScrollItemDelegate):
@@ -395,10 +397,12 @@ class FastDayCalendarView(CalendarViewBase):
 class FastCalendarView(FlyoutViewBase):
 
     dateChanged = Signal(QDate)
+    resetted = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.date = QDate()
+        self._isResetEnabled = False
 
         self.hBoxLayout = QHBoxLayout(self)
         self.stackedWidget = QStackedWidget(self)
@@ -424,6 +428,24 @@ class FastCalendarView(FlyoutViewBase):
         self.monthView.itemClicked.connect(self._onMonthItemClicked)
         self.yearView.itemClicked.connect(self._onYearItemClicked)
         self.dayView.itemClicked.connect(self._onDayItemClicked)
+
+        self.monthView.resetted.connect(self._onResetted)
+        self.yearView.resetted.connect(self._onResetted)
+        self.dayView.resetted.connect(self._onResetted)
+
+    def isRestEnabled(self):
+        return self._isResetEnabled
+
+    def setResetEnabled(self, isEnabled: bool):
+        """ set the visibility of reset button """
+        self._isResetEnabled = isEnabled
+        self.yearView.setResetEnabled(isEnabled)
+        self.monthView.setResetEnabled(isEnabled)
+        self.dayView.setResetEnabled(isEnabled)
+
+    def _onResetted(self):
+        self.resetted.emit()
+        self.close()
 
     def _onDayViewTitleClicked(self):
         self.stackedWidget.setCurrentWidget(self.monthView)

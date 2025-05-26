@@ -1,7 +1,7 @@
 # coding:utf-8
 import sys
 
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtWidgets import QApplication
 from FluentWidgets import CalendarPicker, VerticalScrollWidget, FastCalendarPicker
 
 
@@ -9,7 +9,6 @@ class CalendarPickerDemo(VerticalScrollWidget):
     def __init__(self):
         super().__init__()
         self.calendarPicker = CalendarPicker(self)
-
         self.faseCalendarPicker = FastCalendarPicker(self)
 
         self.addWidget(self.calendarPicker)

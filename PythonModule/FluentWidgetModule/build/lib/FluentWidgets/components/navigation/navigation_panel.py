@@ -6,10 +6,8 @@ from PySide6.QtCore import Qt, QPropertyAnimation, QRect, QSize, QEvent, QEasing
 from PySide6.QtGui import QResizeEvent, QIcon, QColor, QPainterPath
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QFrame, QApplication, QHBoxLayout
 
-from .navigation_widget import (
-    NavigationTreeWidgetBase, NavigationToolButton, NavigationWidget, NavigationSeparator,
-    NavigationTreeWidget, NavigationFlyoutMenu
-)
+from .navigation_widget import (NavigationTreeWidgetBase, NavigationToolButton, NavigationWidget, NavigationSeparator,
+                                NavigationTreeWidget, NavigationFlyoutMenu)
 from ..widgets.acrylic_label import AcrylicBrush
 from ..widgets.scroll_area import ScrollArea
 from ..widgets.tool_tip import ToolTipFilter

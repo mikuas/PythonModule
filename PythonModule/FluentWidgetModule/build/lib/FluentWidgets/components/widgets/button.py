@@ -94,8 +94,7 @@ class PushButton(QPushButton):
             return
 
         painter = QPainter(self)
-        painter.setRenderHints(QPainter.Antialiasing |
-                               QPainter.SmoothPixmapTransform)
+        painter.setRenderHints(QPainter.Antialiasing |QPainter.SmoothPixmapTransform)
 
         if not self.isEnabled():
             painter.setOpacity(0.3628)

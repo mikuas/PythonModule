@@ -3,7 +3,7 @@ from typing import Union
 
 from PySide6.QtCore import Qt, Signal, QRectF, QDate, QPoint, Property
 from PySide6.QtGui import QPainter
-from PySide6.QtWidgets import QPushButton, QApplication
+from PySide6.QtWidgets import QWidget, QPushButton, QApplication
 
 from ...common.style_sheet import FluentStyleSheet
 from ...common.icon import FluentIcon as FIF
@@ -21,6 +21,7 @@ class CalendarPicker(QPushButton):
         super().__init__(parent=parent)
         self._date = QDate()
         self._dateFormat = Qt.DateFormat.ISODate
+        self._isResetEnabled = False
 
         self.setText(self.tr('Pick a date'))
         FluentStyleSheet.CALENDAR_PICKER.apply(self)
@@ -42,6 +43,14 @@ class CalendarPicker(QPushButton):
         self.setStyle(QApplication.style())
         self.update()
 
+    def reset(self):
+        """ reset date """
+        self._date = QDate()
+        self.setText(self.tr('Pick a date'))
+        self.setProperty('hasDate', False)
+        self.setStyle(QApplication.style())
+        self.update()
+
     def getDateFormat(self):
         return self._dateFormat
 
@@ -50,8 +59,18 @@ class CalendarPicker(QPushButton):
         if self.date.isValid():
             self.setText(self.date.toString(self.dateFormat))
 
+    def isRestEnabled(self):
+        return self._isResetEnabled
+
+    def setResetEnabled(self, isEnabled: bool):
+        """ set the visibility of reset button """
+        self._isResetEnabled = isEnabled
+
     def _showCalendarView(self):
         view = CalendarView(self.window())
+        view.setResetEnabled(self.isRestEnabled())
+
+        view.resetted.connect(self.reset)
         view.dateChanged.connect(self._onDateChanged)
 
         if self.date.isValid():
@@ -98,10 +117,13 @@ class FastCalendarPicker(CalendarPicker):
 
     def _showCalendarView(self):
         view = FastCalendarView(self.window())
+        view.setResetEnabled(self.isRestEnabled())
 
+        view.resetted.connect(self.reset)
         view.dateChanged.connect(self._onDateChanged)
 
         if self.date.isValid():
             view.setDate(self.date)
 
-        Flyout.make(view, self, self.window(), self.flyoutAnimationType)
+        flyout = Flyout.make(view, self, self.window(), self.flyoutAnimationType)
+        view.dateChanged.connect(flyout.close)

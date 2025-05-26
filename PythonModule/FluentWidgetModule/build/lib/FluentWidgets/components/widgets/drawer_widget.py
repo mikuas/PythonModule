@@ -1,96 +1,80 @@
 # coding:utf-8
-from enum import Enum
-
 from PySide6.QtGui import QColor, QPainter
-from PySide6.QtWidgets import QFrame, QWidget, QLayout
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QSize, QEvent, QRect
+
+from PySide6.QtWidgets import QFrame, QWidget
+from PySide6.QtCore import Qt, QPropertyAnimation, QPoint, QEasingCurve, QTimer, QSize, QEvent
 
 from ..layout import VBoxLayout, HBoxLayout
 from ..widgets import TransparentToolButton, SubtitleLabel
 from ...common import FluentIcon, isDarkTheme
 
 
-class PopDrawerPosition(Enum):
-    TOP = 0
-    BOTTOM = 1
-    LEFT = 2
-    RIGHT = 3
-
-
-class PopDrawerWidget(QFrame):
+class PopDrawerWidgetBase(QFrame):
     """ pop drawer widget base """
-
     def __init__(
             self,
             parent,
-            title="PopDrawer",
-            duration=500,
-            aniType=QEasingCurve.OutCubic,
-            position=PopDrawerPosition.LEFT
+            title: str,
+            duration=250,
+            aniType=QEasingCurve.Type.Linear,
     ):
         super().__init__(parent)
         # Linear
         # InBack
-        self.setParent(parent)
-        self.setDuration(duration)
-
-        self.drawerManager = PopDrawerManager.get(position, self)
-        self.__lightBgcColor = QColor("#ECECEC")
-        self.__darkBgcColor = QColor("#323232")
+        self.aniType = aniType
+        self.duration = duration
+        self._width = 300
+        self._height = parent.height()
         self.__xRadius = 8
         self.__yRadius = 8
-        self.__isPopup = False
-        self.__clickParentHide = False
-        self.__popAni = QPropertyAnimation(self, b'geometry')
-        self.__popAni.setEasingCurve(aniType)
+        self.__lightBgcColor = QColor("#ECECEC")
+        self.__darkBgcColor = QColor("#323232")
+        self._clickParentHide = True
 
-        self.setGeometry(*self.drawerManager.geometry)
+        self._title = SubtitleLabel(title, self)
+        self._title.setVisible(bool(title))
+        self._closeButton = TransparentToolButton(FluentIcon.CLOSE, self)
+        self._closeButton.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._closeButton.setIconSize(QSize(12, 12))
+        self._closeButton.clicked.connect(self.hide)
+
+        self.setFixedSize(self._width, self._height)
         self.parent().installEventFilter(self)
-        self.__initWidget(title)
+
+        self.__posAni = QPropertyAnimation(self, b'pos')
+
+        super().hide()
         self.__initLayout()
 
     def __initLayout(self):
         self.__vBoxLayout = VBoxLayout(self)
-        self.__titleLayout = HBoxLayout(self)
-        self.__vBoxLayout.insertLayout(0, self.__titleLayout)
-        self.__vBoxLayout.setAlignment(Qt.AlignTop)
+        self.__hBoxLayout = HBoxLayout(self)
+        self.__vBoxLayout.insertLayout(0, self.__hBoxLayout)
+        self.__vBoxLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        self.__titleLayout.addWidget(self._title)
-        self.__titleLayout.addWidget(self._closeButton, alignment=Qt.AlignRight)
-
-    def __initWidget(self, title):
-        self._title = SubtitleLabel(title, self)
-        self._title.setVisible(bool(title))
-        self._closeButton = TransparentToolButton(FluentIcon.CLOSE, self)
-        self._closeButton.setCursor(Qt.PointingHandCursor)
-        self._closeButton.setIconSize(QSize(12, 12))
-        self._closeButton.clicked.connect(lambda: self.popDrawer(True))
-
-    def __adjustDrawer(self):
-        self.setGeometry(*self.drawerManager.newGeometry(self.__isPopup))
-
-    def hideCloseButton(self, hide: bool):
-        if hide:
-            self._closeButton.hide()
-
-    def setDuration(self, duration: int):
-        self.__popAni.setDuration(duration)
+        self.__hBoxLayout.addWidget(self._title)
+        self.__hBoxLayout.addWidget(self._closeButton, alignment=Qt.AlignmentFlag.AlignRight)
 
     def setClickParentHide(self, hide: bool):
-        self.__clickParentHide = hide
+        self._clickParentHide = hide
 
     def addWidget(self, widget: QWidget, stretch=0, alignment=Qt.AlignmentFlag.AlignTop):
         """ add widget to layout """
         self.__vBoxLayout.addWidget(widget, stretch, alignment)
-
-    def addLayout(self, layout: QLayout, stretch=0):
-        self.__vBoxLayout.addLayout(layout, stretch)
+        return self
 
     def setTitleText(self, text: str):
         self._title.setText(text)
 
     def setDuration(self, duration: int):
         self.duration = duration
+
+    def __createPosAni(self, startPoint: QPoint, endPoint: QPoint):
+        self.__posAni.setEasingCurve(self.aniType)
+        self.__posAni.setDuration(self.duration)
+        self.__posAni.setStartValue(startPoint)
+        self.__posAni.setEndValue(endPoint)
+        self.__posAni.start()
 
     def setRoundRadius(self, xRadius: int, yRadius: int):
         self.__xRadius = xRadius
@@ -102,40 +86,39 @@ class PopDrawerWidget(QFrame):
         self.__darkBgcColor = QColor(darkColor)
         self.update()
 
+    def setDrawerSize(self, width: int, height: int):
+        self._width = width
+        self._height = height
+
     def getBackgroundColor(self):
         return self.__darkBgcColor if isDarkTheme() else self.__lightBgcColor
 
-    @property
-    def titleLayout(self):
-        return self.__titleLayout
-
-    @property
-    def xRadius(self):
+    def getXRadius(self):
         return self.__xRadius
 
-    @property
-    def yRadius(self):
+    def getYRadius(self):
         return self.__yRadius
 
-    @property
-    def isPopup(self):
-        return self.__isPopup
-
-    def popDrawer(self, hide=False):
-        self.__popAni.stop()
-        self.__isPopup = not hide
-        endRect = self.drawerManager.getEndRectValue(hide)
-        self.__popAni.setStartValue(self.geometry())
-        self.__popAni.setEndValue(endRect)
-        self.__popAni.start()
+    def show(self):
+        if self.isVisible():
+            self.hide()
+            return
+        self.setVisible(True)
         self.raise_()
+        self.__createPosAni(*self._getShowPos())
+
+    def hide(self):
+        if self.isVisible():
+            self.__createPosAni(*self._getHidePos())
+            QTimer.singleShot(self.duration, lambda: self.setVisible(False))
 
     def eventFilter(self, obj, event):
         if obj is self.parent():
             if event.type() in [QEvent.Type.Resize, QEvent.Type.WindowStateChange]:
-                self.__adjustDrawer()
-            if self.__clickParentHide and event.type() == QEvent.Type.MouseButtonPress:
-                self.popDrawer(True)
+                self._height = self.parent().height()
+                self.setFixedSize(self._width, self._height)
+            if self._clickParentHide and event.type() == QEvent.Type.MouseButtonPress:
+                self.hide()
         return super().eventFilter(obj, event)
 
     def mousePressEvent(self, event):
@@ -147,116 +130,126 @@ class PopDrawerWidget(QFrame):
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setPen(Qt.NoPen)
         painter.setBrush(self.getBackgroundColor())
-        painter.drawRoundedRect(self.rect(), self.xRadius, self.yRadius)
+        painter.drawRoundedRect(self.rect(), self.getXRadius(), self.getYRadius())
 
-
-class PopDrawerManager:
-    registry = {}
-
-    def __init__(self, popDrawer: PopDrawerWidget):
-        super().__init__()
-        self.popDrawer = popDrawer
-        self.parent = popDrawer.parent()
-
-    @classmethod
-    def register(cls, element):
-        def decorator(classType):
-            cls.registry[element] = classType
-            return classType
-
-        return decorator
-
-    @classmethod
-    def get(cls, operation, popDrawer: PopDrawerWidget):
-        if operation not in cls.registry:
-            raise ValueError(f"No operation registered for {operation}")
-        return cls.registry[operation](popDrawer)
-
-    def getEndRectValue(self, hide=False):
+    def _getShowPos(self):
         raise NotImplementedError
 
-    def newGeometry(self, isPop: bool):
-        raise NotImplementedError
-
-    @property
-    def geometry(self):
+    def _getHidePos(self):
         raise NotImplementedError
 
 
-@PopDrawerManager.register(PopDrawerPosition.TOP)
-class TopPopDrawerManager(PopDrawerManager):
+class LeftPopDrawerWidget(PopDrawerWidgetBase):
+    """ left pop drawer widget """
 
-    def newGeometry(self, isPop):
-        height = self.popDrawer.height()
-        width = self.parent.width()
-        return (0, 0, width, height) if isPop else (0, -height, width, height)
+    def __init__(
+            self,
+            parent,
+            title='弹出抽屉',
+            duration=250,
+            aniType=QEasingCurve.Type.Linear
+    ):
+        super().__init__(parent, title, duration, aniType)
 
-    def getEndRectValue(self, hide=False):
-        height = self.popDrawer.height()
-        width = self.parent.width()
-        return QRect(0, -height, width, height) if hide else QRect(0, 0, width, height)
+    def _getShowPos(self):
+        return QPoint(-self.width(), 0), QPoint(0, 0)
 
-    @property
-    def geometry(self):
-        return (0, -200, self.parent.width(), 200)
-
-@PopDrawerManager.register(PopDrawerPosition.BOTTOM)
-class BottomTopDrawerManager(PopDrawerManager):
-
-    def newGeometry(self, isPop):
-        width = self.parent.width()
-        height = self.popDrawer.height()
-        parentHeight = self.parent.height()
-        return (0, parentHeight - height, width, height) if isPop else (0, parentHeight, width, height)
-
-    def getEndRectValue(self, hide=False):
-        width = self.parent.width()
-        height = self.popDrawer.height()
-        parentHeight = self.parent.height()
-        return QRect(0, parentHeight, width, height) if hide else QRect(0, parentHeight - height, width, height)
-
-    @property
-    def geometry(self):
-        width = self.parent.width()
-        height = self.parent.height()
-        return (0, height, width, 200)
+    def _getHidePos(self):
+        return QPoint(0, 0), QPoint(-self.width(), 0)
 
 
-@PopDrawerManager.register(PopDrawerPosition.LEFT)
-class LeftPopDrawerManager(PopDrawerManager):
+class RightPopDrawerWidget(PopDrawerWidgetBase):
+    """ right pop drawer widget """
 
-    def newGeometry(self, isPop):
-        width = self.popDrawer.width()
-        height = self.parent.height()
-        return (0, 0, width, height) if isPop else (-width, 0, width, height)
+    def __init__(
+            self,
+            parent,
+            title='弹出抽屉',
+            duration=250,
+            aniType=QEasingCurve.Type.Linear
+    ):
+        super().__init__(parent, title, duration, aniType)
 
-    def getEndRectValue(self, hide=False):
-        width = self.popDrawer.width()
-        height = self.parent.height()
-        return QRect(-width, 0, width, height) if hide else QRect(0, 0, width, height)
+    def _getShowPos(self):
+        parentWidth = self.parent().width()
+        width = self.width()
+        return QPoint(parentWidth + width, 0), QPoint(parentWidth - width, 0)
 
-    @property
-    def geometry(self):
-        return (-300, 0, 300, self.parent.height())
+    def _getHidePos(self):
+        parentWidth = self.parent().width()
+        width = self.width()
+        return QPoint(parentWidth - width, 0), QPoint(parentWidth + width, 0)
+
+    def eventFilter(self, obj, event):
+        if obj is self.parent():
+            if event.type() in [QEvent.Type.Resize, QEvent.Type.WindowStateChange]:
+                self._height = self.parent().height()
+                self.setFixedSize(self._width, self._height)
+                self.move(self._getShowPos()[1])
+            if self._clickParentHide and event.type() == QEvent.Type.MouseButtonPress:
+                self.hide()
+        return super().eventFilter(obj, event)
 
 
-@PopDrawerManager.register(PopDrawerPosition.RIGHT)
-class RightPopDrawerManager(PopDrawerManager):
+class TopPopDrawerWidget(PopDrawerWidgetBase):
+    """ top pop drawer widget """
 
-    def newGeometry(self, isPop):
-        width = self.popDrawer.width()
-        parentWidth = self.parent.width()
-        parentHeight = self.parent.height()
-        return (parentWidth - width, 0, width, parentHeight) if isPop else (parentWidth, 0, width, parentHeight)
+    def __init__(
+            self,
+            parent,
+            title='弹出抽屉',
+            duration=250,
+            aniType=QEasingCurve.Type.Linear
+    ):
+        super().__init__(parent, title, duration, aniType)
+        self.setDrawerSize(parent.width(), 250)
 
-    def getEndRectValue(self, hide=False):
-        width = self.popDrawer.width()
-        parentWidth = self.parent.width()
-        parentHeight = self.parent.height()
-        return QRect(parentWidth, 0, width, parentHeight) if hide else QRect(parentWidth - width, 0, width, parentHeight)
+    def _getShowPos(self):
+        return QPoint(0, -self.height()), QPoint(0, 0)
 
-    @property
-    def geometry(self):
-        parentWidth = self.parent.width()
-        parentHeight = self.parent.height()
-        return (parentWidth, 0, 300, parentHeight)
+    def _getHidePos(self):
+        return QPoint(0, 0), QPoint(0, -self.height())
+
+    def eventFilter(self, obj, event):
+        if obj is self.parent():
+            if event.type() in [QEvent.Type.Resize, QEvent.Type.WindowStateChange]:
+                self._width = self.parent().width()
+                self.setFixedSize(self._width, self._height)
+                self.move(self._getShowPos()[1])
+            if self._clickParentHide and event.type() == QEvent.Type.MouseButtonPress:
+                self.hide()
+        return False
+
+
+class BottomPopDrawerWidget(PopDrawerWidgetBase):
+    """ bottom pop drawer widget """
+
+    def __init__(
+            self,
+            parent,
+            title='弹出抽屉',
+            duration=250,
+            aniType=QEasingCurve.Type.Linear
+    ):
+        super().__init__(parent, title, duration, aniType)
+        self.setDrawerSize(parent.width(), 250)
+
+    def _getShowPos(self):
+        parentHeight = self.parent().height()
+        height = self.height()
+        return QPoint(0, parentHeight + height), QPoint(0, parentHeight - height)
+
+    def _getHidePos(self):
+        parentHeight = self.parent().height()
+        height = self.height()
+        return QPoint(0, parentHeight - height), QPoint(0, parentHeight + height)
+
+    def eventFilter(self, obj, event):
+        if obj is self.parent():
+            if event.type() in [QEvent.Type.Resize, QEvent.Type.WindowStateChange]:
+                self._width = self.parent().width()
+                self.setFixedSize(self._width, self._height)
+                self.move(self._getShowPos()[1])
+            if self._clickParentHide and event.type() == QEvent.Type.MouseButtonPress:
+                self.hide()
+        return False
