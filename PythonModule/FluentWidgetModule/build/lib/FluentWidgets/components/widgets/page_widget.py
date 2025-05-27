@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QWidget
 
 from ..layout import VBoxLayout, HBoxLayout
 from .pips_pager import PipsPager, PipsScrollButtonDisplayMode
-from .pop_up_stacked_widget import PopUpStackedWidget
+from .stacked_widget import PopUpAniStackedWidget
 
 
 class PagerWidgetBase(QWidget):
@@ -14,7 +14,7 @@ class PagerWidgetBase(QWidget):
         super().__init__(parent)
         self.__toggle = True
         self._pager = PipsPager(orientation, self)
-        self._stackedWidget = PopUpStackedWidget(self)
+        self._stackedWidget = PopUpAniStackedWidget(self)
         self._pager.currentIndexChanged.connect(lambda index: self._stackedWidget.setCurrentIndex(index))
         self.__widgets = []  # type: [QWidget]
 

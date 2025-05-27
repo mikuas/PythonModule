@@ -253,7 +253,7 @@ class SmoothSwitchPushButton(SmoothWidget):
             )
             rect.adjust(w + self._iconSize + 10, 0, 0, 0)
             align = Qt.AlignVCenter
-
         # draw text
+
         painter.setPen(self.getItemColor())
         painter.drawText(rect, align, self._text)

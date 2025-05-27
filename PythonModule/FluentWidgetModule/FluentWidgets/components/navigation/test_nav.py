@@ -17,8 +17,6 @@ from ...common.config import isDarkTheme
 from ...common.icon import FluentIconBase, FluentIcon
 from .navigation_panel import RouteKeyError, NavigationItemPosition
 
-from qfluentwidgets import NavigationWidget
-
 
 class SlidingNavigationBar: pass
 

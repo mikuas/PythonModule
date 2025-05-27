@@ -54,6 +54,7 @@ FluentWidgets/components/material/acrylic_tool_tip.py
 FluentWidgets/components/material/acrylic_widget.py
 FluentWidgets/components/navigation/__init__.py
 FluentWidgets/components/navigation/breadcrumb.py
+FluentWidgets/components/navigation/demo.py
 FluentWidgets/components/navigation/navigation_bar.py
 FluentWidgets/components/navigation/navigation_interface.py
 FluentWidgets/components/navigation/navigation_panel.py
@@ -61,6 +62,7 @@ FluentWidgets/components/navigation/navigation_widget.py
 FluentWidgets/components/navigation/pivot.py
 FluentWidgets/components/navigation/segmented_navigation_widget.py
 FluentWidgets/components/navigation/segmented_widget.py
+FluentWidgets/components/navigation/sliding_navigation_bar.py
 FluentWidgets/components/navigation/test_nav.py
 FluentWidgets/components/navigation/test_nav_widget.py
 FluentWidgets/components/settings/__init__.py
@@ -95,7 +97,6 @@ FluentWidgets/components/widgets/list_widget.py
 FluentWidgets/components/widgets/menu.py
 FluentWidgets/components/widgets/page_widget.py
 FluentWidgets/components/widgets/pips_pager.py
-FluentWidgets/components/widgets/pop_up_stacked_widget.py
 FluentWidgets/components/widgets/scroll_area.py
 FluentWidgets/components/widgets/scroll_bar.py
 FluentWidgets/components/widgets/scroll_widget.py

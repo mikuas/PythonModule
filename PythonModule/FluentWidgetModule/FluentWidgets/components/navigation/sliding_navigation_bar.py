@@ -1,16 +1,22 @@
 # coding:utf-8
-from typing import Union
+from typing import Union, overload, List, Dict
 
 from PySide6.QtWidgets import QWidget, QFrame
-from PySide6.QtCore import Qt, QRect
-from PySide6.QtGui import QPainter, QColor, QFontMetrics
+from PySide6.QtCore import Qt, QRect, Signal, QPropertyAnimation, QPoint, QTimer, QEvent
+from PySide6.QtGui import QPainter, QColor, QFontMetrics, QPen
 
-# from ...common.color import themeColor, isDarkTheme
-# from ...common.icon import FluentIcon, drawIcon, Icon
-from FluentWidgets import themeColor, isDarkTheme, FluentIcon, drawIcon, Icon, setFont
+from ...common.color import themeColor, isDarkTheme
+from ...common.font import setFont
+from ...common.icon import FluentIcon, drawIcon, Icon
+from ...components.navigation.navigation_panel import RouteKeyError
+from ...components.widgets.tool_tip import setToolTipInfo
+from ..layout import HBoxLayout
+from ..widgets.scroll_widget import SingleDirectionScrollArea
 
 
 class SlidingWidget(QWidget):
+    clicked = Signal(QWidget)
+
     def __init__(self, text: str, icon: FluentIcon = None, isSelected=False):
         super().__init__()
         self.isHover = False
@@ -23,7 +29,7 @@ class SlidingWidget(QWidget):
         self.__iconSize = 16
         self.__fontMetrics = QFontMetrics(self.font())
         setFont(self, 16)
-        self._adjustSize()
+        self._adjustSize(self.__iconSize * 2 if icon else 0)
 
     def _adjustSize(self, size=0):
         self.setMinimumSize(self.__fontMetrics.horizontalAdvance(self.__text) + 32 + size, 35)
@@ -40,8 +46,13 @@ class SlidingWidget(QWidget):
         self.update()
         super().leaveEvent(event)
 
+    def mouseReleaseEvent(self, event):
+        super().mouseReleaseEvent(event)
+        self.clicked.emit(self)
+
     def setSelected(self, isSelected: bool):
         self.isSelected = isSelected
+        self.__updateIconColor()
         self.update()
 
     def setText(self, text: str):
@@ -52,6 +63,12 @@ class SlidingWidget(QWidget):
     def setIcon(self, icon: FluentIcon):
         self.__icon = icon
         self._adjustSize(self.__iconSize)
+        self.update()
+
+    def setIconSize(self, size: int):
+        if self.__iconSize == size:
+            return
+        self.__iconSize = size
         self.update()
 
     def setTextColor(self, color: Union[str, QColor]):
@@ -66,25 +83,27 @@ class SlidingWidget(QWidget):
         self.__hoverColor = color
         self.update()
 
-    def setSelectedTextColor(self, color: Union[str, QColor]):
+    def setSelectedColor(self, color: Union[str, QColor]):
         if self.__selectedColor == color:
             return
         self.__selectedColor = color
         self.update()
+        self.__updateIconColor()
 
     def __updateIconColor(self):
-        tc = themeColor()
-        if self.isSelected:
-            c = self.__selectedColor or tc
+        if self.__icon:
+            tc = themeColor()
+            if self.isSelected:
+                c = self.__selectedColor or tc
+                self.__icon = self.__icon.colored(c, c)
+                return
+            elif self.isHover:
+                c = self.__hoverColor or tc
+                self.__icon = self.__icon.colored(c, c)
+                return
+            c = 255 if isDarkTheme() else 0
+            c = QColor(c, c, c)
             self.__icon = self.__icon.colored(c, c)
-            return
-        elif self.isHover:
-            c = self.__hoverColor or tc
-            self.__icon = self.__icon.colored(c, c)
-            return
-        c = 255 if isDarkTheme() else 0
-        c = QColor(c, c, c)
-        self.__icon = self.__icon.colored(c, c)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -116,7 +135,7 @@ class SlidingLine(QFrame):
         super().__init__(parent)
         self.setFixedHeight(height)
         self.hide()
-        self.__color = color or themeColor()
+        self.__color = color
 
     def setLineColor(self, color: QColor | str):
         self.__color = QColor(color)
@@ -127,165 +146,230 @@ class SlidingLine(QFrame):
         painter = QPainter(self)
         painter.setPen(Qt.NoPen)
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.setBrush(self.__color)
+        painter.setBrush(self.__color or themeColor())
         painter.drawRoundedRect(self.rect(), 2, 2)
 
 
-if __name__ == '__main__':
-    class Demo(QWidget):
-        def __init__(self):
-            super().__init__()
-            from FluentWidgets import HBoxLayout
-            self.box = HBoxLayout(self)
-            self.w = SlidingWidget('hello world', icon=FluentIcon.HOME)
-            self.box.addWidget(self.w, 1, Qt.AlignmentFlag.AlignTop)
+class SmoothSeparator(QWidget):
+    """ Smooth Switch Separator """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedWidth(6)
+        self.color = None
 
-    import sys
-    from PySide6.QtWidgets import QApplication
-    app = QApplication(sys.argv)
-    window = Demo()
-    window.resize(800, 520)
-    window.show()
-    sys.exit(app.exec())
+    def setSeparatorColor(self, color: str | QColor):
+        self.color = QColor(color)
+        self.update()
 
-# class SlidingNavigationBar(SingleDirectionScrollArea):
-#     def __init__(self, parent=None):
-#         super().__init__(parent)
-#         self._items = {} # type: Dict[str, None]
-#         self._boxLayout = QHBoxLayout(self)
-#         self.__widget = QWidget()
-#         self.__currentWidget = None
-#         self.__slideLineWidth = 30
-#         self.__initScrollWidget()
-#
-#         self.__slidingLine = SlidingLine(self.__widget)
-#         self.__slidingLine.setFixedSize(self.__slideLineWidth, 3)
-#         self.__posAni = QPropertyAnimation(self.__slidingLine, b'pos')
-#
-#         parent.installEventFilter(self)
-#
-#     def __initScrollWidget(self):
-#         self.enableTransparentBackground()
-#         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-#         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-#         self.setWidgetResizable(True)
-#         self.setWidget(self.__widget)
-#
-#     def __getSlideEndPos(self, item):
-#         pos = item.pos()
-#         x = pos.x()
-#         y = pos.y()
-#         width = item.width()
-#         height = item.height()
-#         return QPoint(x + width / 2 - self.__slideLineWidth / 2, y + height + 5)
-#
-#     def __createPosAni(self, item):
-#         self.__posAni.setDuration(200)
-#         self.__posAni.setStartValue(self.__slidingLine.pos())
-#         self.__posAni.setEndValue(self.__getSlideEndPos(item))
-#         self.__posAni.start()
-#
-#     def __adjustSlideLinePos(self):
-#         QTimer.singleShot(1, lambda: (self.__slidingLine.move(self.__getSlideEndPos(self.__currentWidget))))
-#
-#     @staticmethod
-#     def _setTextColor(item):
-#         if item.isSelected:
-#             return
-#         item.updateSelectedColor(item.isHover)
-#
-#     def _onClicked(self, item: SmoothWidget):
-#         self.setCurrentWidget(item.property('routeKey'))
-#
-#     def setBarAlignment(self, alignment: Qt.AlignmentFlag):
-#         self._widgetLayout.setAlignment(alignment)
-#
-#     def addSeparator(self):
-#         return self.insertSeparator(-1)
-#
-#     def insertSeparator(self, index: int):
-#         separator = SmoothSeparator(self)
-#         self._widgetLayout.insertWidget(index, separator)
-#         return separator
-#
-#     def setSlideLineWidth(self, width: int):
-#         self.__slideLineWidth = width
-#         self.__slideLine.setFixedWidth(self.__slideLineWidth)
-#         self.__adjustSlideLinePos()
-#
-#     def setSlideLineColor(self, color: str | QColor):
-#         self.__slideLine.setLineColor(color)
-#
-#     def setItemBackgroundColor(self, light: QColor | str, dark: QColor | str):
-#         for item in self._items.values():
-#             item.setLightBackgroundColor(light)
-#             item.setDarkBackgroundColor(dark)
-#
-#     def setItemSelectedColor(self, color: QColor | str):
-#         for item in self._items.values():
-#             item.setSelectedColor(color)
-#
-#     def setItemSize(self, width: int, height: int):
-#         for item in self._items.values():
-#             item.setFixedSize(width, height)
-#
-#     def setIconSize(self, size: int):
-#         for item in self._items.values():
-#             item.setIconSize(size)
-#
-#     def setCurrentWidget(self, routeKey: str):
-#         if routeKey not in self._items.keys():
-#             return
-#         if self.__slideLine.isHidden(): self.__slideLine.show()
-#         for w in self._items.values():
-#             w.setSelected(False)
-#         item = self.getWidget(routeKey)
-#         self.__currentWidget = item
-#         item.setSelected(True)
-#         QTimer.singleShot(1, lambda: self.__createPosAni(item))
-#
-#     def addItem(self, routeKey, icon, onClick=None, isSelected=False):
-#         item = SmoothSwitchToolButton(icon, self)
-#         item.setProperty('routeKey', routeKey)
-#         self._append(routeKey, item)
-#         setToolTipInfo(item, routeKey, 1500, ToolTipPosition.TOP)
-#         self._widgetLayout.addWidget(item)
-#
-#         item.clicked.connect(lambda w: self._onClicked(w))
-#         item.clicked.connect(onClick)
-#         item.hoverSignal.connect(lambda w: self._setTextColor(w))
-#         item.leaveSignal.connect(lambda w: self._setTextColor(w))
-#         if isSelected:
-#             self.setCurrentWidget(routeKey)
-#
-#     def getCurrentWidget(self):
-#         return self.__currentWidget
-#
-#     def getWidget(self, routeKey: str) -> SmoothWidget:
-#         return super().getWidget(routeKey)
-#
-#     def getAllWidget(self) -> Dict[str, SmoothWidget]:
-#         return super().getAllWidget()
-#
-#     def eventFilter(self, obj, event):
-#         if event.type() in [QEvent.Resize, QEvent.WindowStateChange] and self.getCurrentWidget():
-#             self.__adjustSlideLinePos()
-#         return super().eventFilter(obj, event)
-#
-#
-# class SlidingToolNavigationBar(SlidingNavigationBar):
-#     def __init__(self, parent=None):
-#         super().__init__(parent)
-#
-#     def addItem(self, routeKey, text: str, icon=None, onClick=None, isSelected=False):
-#         item = SmoothSwitchPushButton(text, icon, self)
-#         item.setProperty('routeKey', routeKey)
-#         self._append(routeKey, item)
-#         self._widgetLayout.addWidget(item)
-#
-#         item.clicked.connect(lambda w: self._onClicked(w))
-#         item.clicked.connect(onClick)
-#         item.hoverSignal.connect(lambda w: self._setTextColor(w))
-#         item.leaveSignal.connect(lambda w: self._setTextColor(w))
-#         if isSelected:
-#             self.setCurrentWidget(routeKey)
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        color = 255 if isDarkTheme() else 0
+        pen = QPen(self.color or QColor(color, color, color, 128), 3)
+        pen.setCapStyle(Qt.RoundCap)
+        painter.setPen(pen)
+        painter.drawLine(2, 10, 2, self.height() - 10)
+
+
+class SlidingNavigationBar(SingleDirectionScrollArea):
+
+    currentItemChange = Signal(SlidingWidget)
+
+    def __init__(self, parent: QWidget):
+        super().__init__(parent, Qt.Horizontal)
+        self.setFixedHeight(60)
+        self._items = {} # type: Dict[str, SlidingWidget]
+        self.__widget = QWidget()
+        self.__currentWidget = None # type: SlidingWidget
+        self.__slideLineWidth = 30
+        self.__slidingLine = SlidingLine(self.__widget)
+        self.__slidingLine.raise_()
+        self.__slidingLine.setFixedSize(self.__slideLineWidth, 3)
+        self.__posAni = QPropertyAnimation(self.__slidingLine, b"pos")
+
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setWidgetResizable(True)
+
+        self._widgetLayout = HBoxLayout(self.__widget)
+        self.setWidget(self.__widget)
+        parent.installEventFilter(self)
+
+    def __getSlideEndPos(self, item: SlidingWidget):
+        pos = item.pos()
+        x = pos.x()
+        y = pos.y()
+        width = item.width()
+        height = item.height()
+        return QPoint(x + width / 2 - self.__slideLineWidth / 2, y + height + 5)
+
+    def __createPosAni(self, item: SlidingWidget):
+        self.__posAni.setDuration(200)
+        self.__posAni.setStartValue(self.__slidingLine.pos())
+        self.__posAni.setEndValue(self.__getSlideEndPos(item))
+        self.__posAni.start()
+
+    def __adjustSlideLinePos(self):
+        QTimer.singleShot(1, lambda: (self.__slidingLine.move(self.__getSlideEndPos(self.__currentWidget))))
+
+    def _onClicked(self, item: SlidingWidget):
+        self.setCurrentWidget(item)
+
+    def setBarAlignment(self, alignment: Qt.AlignmentFlag):
+        self._widgetLayout.setAlignment(alignment)
+
+    def addSeparator(self):
+        return self.insertSeparator(-1)
+
+    def insertSeparator(self, index: int):
+        separator = SmoothSeparator(self)
+        self._widgetLayout.insertWidget(index, separator)
+        return separator
+
+    def setSlideLineWidth(self, width: int):
+        self.__slideLineWidth = width
+        self.__slidingLine.setFixedWidth(self.__slideLineWidth)
+        self.__adjustSlideLinePos()
+
+    def setSlideLineColor(self, color: str | QColor):
+        self.__slidingLine.setLineColor(color)
+
+    def setItemSelectedColor(self, color: str | QColor):
+        for item in self._items.values():
+            item.setSelectedColor(color)
+
+    def setItemColor(self, color: str | QColor):
+        for item in self._items.values():
+            item.setTextColor(color)
+
+    def setItemHoverColor(self, color: str | QColor):
+        for item in self._items.values():
+            item.setHoverTextColor(color)
+
+    def setItemSize(self, width: int, height: int):
+        for item in self._items.values():
+            item.setFixedSize(width, height)
+
+    @overload
+    def setCurrentWidget(self, item: str): ...
+    @overload
+    def setCurrentWidget(self, item: SlidingWidget): ...
+
+    def setCurrentWidget(self, item: str | SlidingWidget):
+        if self.__slidingLine.isHidden(): self.__slidingLine.show()
+        if isinstance(item, str):
+            if item not in self._items.keys():
+                return
+            item = self._items[item]
+        if item not in self._items.values():
+            return
+        for _item_ in self._items.values():
+            _item_.setSelected(False)
+        self.__currentWidget = item
+        item.setSelected(True)
+        self.currentItemChange.emit(item)
+        QTimer.singleShot(1, lambda: self.__createPosAni(item))
+
+    def setCurrentIndex(self, index: int):
+        self.setCurrentWidget(list(self._items.keys())[index])
+
+    def addStretch(self, stretch: int):
+        self._widgetLayout.addStretch(stretch)
+
+    def addItem(
+            self,
+            routeKey: str,
+            text: str,
+            icon: FluentIcon = None,
+            onClick=None,
+            isSelected=False,
+            alignment: Qt.AlignmentFlag = Qt.AlignTop,
+            toolTip: str = None
+    ):
+        self.insertItem(-1, routeKey, text, icon, onClick, isSelected, alignment, toolTip)
+
+    def insertItem(
+            self,
+            index: int,
+            routeKey: str,
+            text: str,
+            icon: FluentIcon = None,
+            onClick=None,
+            isSelected=False,
+            alignment: Qt.AlignmentFlag = Qt.AlignTop,
+            toolTip: str = None
+    ):
+        if routeKey in self._items.keys():
+            raise RouteKeyError('routeKey Are Not Unique')
+        item = SlidingWidget(text, icon)
+        item.setProperty("routeKey", routeKey)
+        self._widgetLayout.insertWidget(index, item, alignment=alignment)
+        self._items[routeKey] = item
+
+        item.clicked.connect(lambda w: self._onClicked(w))
+        item.clicked.connect(onClick)
+        if isSelected:
+            self.setCurrentWidget(routeKey)
+        if toolTip:
+            setToolTipInfo(item, toolTip, 1000)
+
+    def currentWidget(self):
+        return self.__currentWidget
+
+    def widget(self, routeKey: str) -> SlidingWidget:
+        return self._items[routeKey]
+
+    def allWidget(self) -> List[SlidingWidget]:
+        return list(self._items.values())
+
+    def eventFilter(self, obj, event):
+        if event.type() in [QEvent.Resize, QEvent.WindowStateChange] and self.currentWidget():
+            self.__adjustSlideLinePos()
+        return super().eventFilter(obj, event)
+
+
+class SlidingToolNavigationBar(SlidingNavigationBar):
+
+    def __init__(self, parent):
+        super().__init__(parent)
+
+    def setIconSize(self, size: int):
+        for item in self.allWidget():
+            item.setIconSize(size)
+
+    def addItem(
+            self,
+            routeKey: str,
+            icon: FluentIcon,
+            onClick=None,
+            isSelected=False,
+            alignment: Qt.AlignmentFlag = Qt.AlignTop,
+            toolTip: str = None
+    ):
+        self.insertItem(-1, routeKey, icon, onClick, isSelected, alignment, toolTip)
+
+    def insertItem(
+            self,
+            index: int,
+            routeKey: str,
+            icon: FluentIcon,
+            onClick=None,
+            isSelected=False,
+            alignment: Qt.AlignmentFlag = Qt.AlignTop,
+            toolTip: str = None
+    ):
+        if routeKey in self._items.keys():
+            raise RouteKeyError('routeKey Are Not Unique')
+        item = SlidingWidget('', icon)
+        item.setProperty("routeKey", routeKey)
+        self._widgetLayout.insertWidget(index, item, alignment=alignment)
+        self._items[routeKey] = item
+
+        item.clicked.connect(lambda w: self._onClicked(w))
+        if onClick:
+            item.clicked.connect(onClick)
+        if isSelected:
+            self.setCurrentWidget(routeKey)
+        if toolTip:
+            setToolTipInfo(item, toolTip, 1000)

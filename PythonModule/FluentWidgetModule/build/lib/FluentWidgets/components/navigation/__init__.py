@@ -7,3 +7,4 @@ from .pivot import Pivot, PivotItem
 from .segmented_widget import (SegmentedItem, SegmentedWidget, SegmentedToolItem, SegmentedToolWidget,
                                SegmentedToggleToolItem, SegmentedToggleToolWidget)
 from .breadcrumb import BreadcrumbBar, BreadcrumbItem
+from .sliding_navigation_bar import SlidingLine, SlidingWidget, SlidingNavigationBar, SlidingToolNavigationBar
