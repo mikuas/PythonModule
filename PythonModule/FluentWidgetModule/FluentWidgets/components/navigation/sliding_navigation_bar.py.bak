@@ -22,7 +22,7 @@ class SlidingWidget(QWidget):
         self.isHover = False
         self.isSelected = isSelected
         self.__text = text
-        self.__icon = None # type: FluentIcon
+        self.__icon = None
         self.__textColor = None
         self.__hoverColor = None
         self.__selectedColor = None
@@ -37,14 +37,16 @@ class SlidingWidget(QWidget):
         self.setMinimumSize(self.__fontMetrics.horizontalAdvance(self.__text) + 32 + size, 35)
 
     def enterEvent(self, event):
-        super().enterEvent(event)
         self.isHover = True
+        self.__updateIconColor()
         self.update()
+        super().enterEvent(event)
 
     def leaveEvent(self, event):
-        super().leaveEvent(event)
         self.isHover = False
+        self.__updateIconColor()
         self.update()
+        super().leaveEvent(event)
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
@@ -52,6 +54,7 @@ class SlidingWidget(QWidget):
 
     def setSelected(self, isSelected: bool):
         self.isSelected = isSelected
+        self.__updateIconColor()
         self.update()
 
     def setText(self, text: str):
@@ -87,32 +90,44 @@ class SlidingWidget(QWidget):
             return
         self.__selectedColor = color
         self.update()
+        self.__updateIconColor()
+
+    def __updateIconColor(self):
+        if self.__icon:
+            tc = themeColor()
+            if self.isSelected:
+                c = self.__selectedColor or tc
+                self.__icon = self.__icon.colored(c, c)
+                return
+            elif self.isHover:
+                c = self.__hoverColor or tc
+                self.__icon = self.__icon.colored(c, c)
+                return
+            c = 255 if isDarkTheme() else 0
+            c = QColor(c, c, c)
+            self.__icon = self.__icon.colored(c, c)
 
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
         rect = self.rect()
         align = Qt.AlignCenter
-        if self.isSelected:
-            c = self.__selectedColor or themeColor()
-        elif self.isHover:
-            c = self.__hoverColor or themeColor()
-        else:
-            c = 255 if isDarkTheme() else 0
         if self.__icon:
             x = (self.width() - self.__fontMetrics.horizontalAdvance(self.__text) - self.__iconSize) / 2
             y = (self.height() - self.__iconSize) / 2
-            self._drawIcon(c, painter, QRect(x, y, self.__iconSize, self.__iconSize))
+            drawIcon(Icon(self.__icon), painter, QRect(x, y, self.__iconSize, self.__iconSize))
             rect.adjust(x + self.__iconSize + 10, 0, 0, 0)
             align = Qt.AlignVCenter
-        self._drawText(c, painter, rect, align)
+        self._drawText(painter, rect, align)
 
-    def _drawIcon(self, color, painter: QPainter, rect: QRect):
-        self.__icon = self.__icon.colored(color, color)
-        self.__icon.render(painter, rect)
-
-    def _drawText(self, color, painter: QPainter, rect: QRect, align: Qt.AlignmentFlag):
-        painter.setPen(color)
+    def _drawText(self, painter: QPainter, rect: QRect, align: Qt.AlignmentFlag):
+        c = 255 if isDarkTheme() else 0
+        if self.isSelected:
+            painter.setPen(self.__selectedColor or themeColor())
+        elif self.isHover:
+            painter.setPen(self.__hoverColor or themeColor())
+        else:
+            painter.setPen(self.__textColor or QColor(c, c, c))
         painter.drawText(rect, align, self.__text)
 
 
@@ -184,6 +199,12 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         self._widgetLayout = HBoxLayout(self.__widget)
         self.currentItemChange.connect(lambda w:  w.update())
         parent.installEventFilter(self)
+
+    def wheelEvent(self, e: QWheelEvent):
+        super().wheelEvent(e)
+        for _ in self._items.values():
+            _.isHover = False
+            _.update()
 
     def __getSlideEndPos(self, item: SlidingWidget):
         pos = item.pos()
