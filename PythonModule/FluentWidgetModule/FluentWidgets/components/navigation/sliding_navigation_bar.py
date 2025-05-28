@@ -298,7 +298,8 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         self._items[routeKey] = item
 
         item.clicked.connect(lambda w: self._onClicked(w))
-        item.clicked.connect(onClick)
+        if onClick:
+            item.clicked.connect(onClick)
         if isSelected:
             self.setCurrentWidget(routeKey)
         if toolTip:
