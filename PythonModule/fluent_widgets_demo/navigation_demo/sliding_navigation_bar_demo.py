@@ -91,6 +91,17 @@ class SlidingNavigationBarDemo(VerticalScrollWidget):
         })
         self.settingPopDrawer.addWidget(selectedColorEdit)
 
+        self.settingPopDrawer.addWidget(TitleLabel("设置Item宽"), alignment=Qt.AlignHCenter)
+        selectedColorEdit = LineEdit()
+        selectedColorEdit.setClearButtonEnabled(True)
+        selectedColorEdit.textChanged.connect(lambda text: {
+            self.slidingNavigationBar1.setItemSize(int(text), 35),
+            self.slidingNavigationBar2.setItemSize(int(text), 35),
+            self.slidingToolNavigationBar1.setItemSize(int(text), 35),
+            self.slidingToolNavigationBar2.setItemSize(int(text), 35)
+        })
+        self.settingPopDrawer.addWidget(selectedColorEdit)
+
         self.settingPopDrawer.addWidget(TitleLabel("移动到指定Index"), alignment=Qt.AlignHCenter)
         comboBox = ComboBox(self)
         comboBox.setMaxVisibleItems(10)
@@ -101,20 +112,31 @@ class SlidingNavigationBarDemo(VerticalScrollWidget):
         })
         self.settingPopDrawer.addWidget(comboBox)
 
+        self.settingPopDrawer.addWidget(TitleLabel("删除指定控件"), alignment=Qt.AlignHCenter)
+        comboBox = ComboBox(self)
+        comboBox.setMaxVisibleItems(10)
+        comboBox.addItems([str(index) for index in range(len(self.icons))])
+        comboBox.currentIndexChanged.connect(lambda index: {
+            self.slidingNavigationBar1.removeItem(self.slidingToolNavigationBar1.allItem()[index].property("routeKey")),
+        })
+        self.settingPopDrawer.addWidget(comboBox)
+
     def initNavigationBar(self):
         for icon in self.icons:
             index = self.icons.index(icon)
             self.slidingNavigationBar1.addItem(
                 f"Item {index}",
                 f"Interface {index}",
-                icon
+                icon,
+                toolTip='This is Test ToolTip'
             )
             if index > 5:
                 continue
             self.slidingNavigationBar2.addItem(
                 f"Item {index}",
                 f"Interface {index}",
-                alignment=Qt.AlignLeft
+                alignment=Qt.AlignLeft,
+                toolTip='This is Test ToolTip'
             )
 
     def initToolNavigationBar(self):
@@ -122,14 +144,16 @@ class SlidingNavigationBarDemo(VerticalScrollWidget):
             index = self.icons.index(icon)
             self.slidingToolNavigationBar1.addItem(
                 f"Item {index}",
-                icon
+                icon,
+                toolTip='This is Test ToolTip'
             )
             if index > 5:
                 continue
             self.slidingToolNavigationBar2.addItem(
                 f"Item {index}",
                 icon,
-                alignment=Qt.AlignLeft
+                alignment=Qt.AlignLeft,
+                toolTip='This is Test ToolTip'
             )
 
 
