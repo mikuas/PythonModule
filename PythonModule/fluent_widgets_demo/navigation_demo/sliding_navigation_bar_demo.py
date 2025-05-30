@@ -61,55 +61,32 @@ class SlidingNavigationBarDemo(VerticalScrollWidget):
         self.settingPopDrawer.addWidget(TitleLabel("设置Item颜色"), alignment=Qt.AlignHCenter)
         colorEdit = LineEdit()
         colorEdit.setClearButtonEnabled(True)
-        colorEdit.textChanged.connect(lambda text: {
-            self.slidingNavigationBar1.setItemColor(str(text)),
-            self.slidingNavigationBar2.setItemColor(str(text)),
-            self.slidingToolNavigationBar1.setItemColor(str(text)),
-            self.slidingToolNavigationBar2.setItemColor(str(text))
-        })
+        colorEdit.textChanged.connect(self.updateItemColor)
         self.settingPopDrawer.addWidget(colorEdit)
 
         self.settingPopDrawer.addWidget(TitleLabel("设置Item悬停颜色"), alignment=Qt.AlignHCenter)
         hoverColorEdit = LineEdit()
         hoverColorEdit.setClearButtonEnabled(True)
-        hoverColorEdit.textChanged.connect(lambda text: {
-            self.slidingNavigationBar1.setItemHoverColor(str(text)),
-            self.slidingNavigationBar2.setItemHoverColor(str(text)),
-            self.slidingToolNavigationBar1.setItemHoverColor(str(text)),
-            self.slidingToolNavigationBar2.setItemHoverColor(str(text))
-        })
+        hoverColorEdit.textChanged.connect(self.updateHoverColor)
         self.settingPopDrawer.addWidget(hoverColorEdit)
 
         self.settingPopDrawer.addWidget(TitleLabel("设置Item选中颜色"), alignment=Qt.AlignHCenter)
         selectedColorEdit = LineEdit()
         selectedColorEdit.setClearButtonEnabled(True)
-        selectedColorEdit.textChanged.connect(lambda text: {
-            self.slidingNavigationBar1.setItemSelectedColor(str(text)),
-            self.slidingNavigationBar2.setItemSelectedColor(str(text)),
-            self.slidingToolNavigationBar1.setItemSelectedColor(str(text)),
-            self.slidingToolNavigationBar2.setItemSelectedColor(str(text))
-        })
+        selectedColorEdit.textChanged.connect(self.updateSelectedColor)
         self.settingPopDrawer.addWidget(selectedColorEdit)
 
         self.settingPopDrawer.addWidget(TitleLabel("设置Item宽"), alignment=Qt.AlignHCenter)
         selectedColorEdit = LineEdit()
         selectedColorEdit.setClearButtonEnabled(True)
-        selectedColorEdit.textChanged.connect(lambda text: {
-            self.slidingNavigationBar1.setItemSize(int(text), 35),
-            self.slidingNavigationBar2.setItemSize(int(text), 35),
-            self.slidingToolNavigationBar1.setItemSize(int(text), 35),
-            self.slidingToolNavigationBar2.setItemSize(int(text), 35)
-        })
+        selectedColorEdit.textChanged.connect(self.updateSize)
         self.settingPopDrawer.addWidget(selectedColorEdit)
 
         self.settingPopDrawer.addWidget(TitleLabel("移动到指定Index"), alignment=Qt.AlignHCenter)
         comboBox = ComboBox(self)
         comboBox.setMaxVisibleItems(10)
         comboBox.addItems([str(index) for index in range(len(self.icons))])
-        comboBox.currentIndexChanged.connect(lambda index: {
-            self.slidingNavigationBar1.setCurrentIndex(index),
-            self.slidingToolNavigationBar1.setCurrentIndex(index)
-        })
+        comboBox.currentIndexChanged.connect(self.updateIndex)
         self.settingPopDrawer.addWidget(comboBox)
 
         self.settingPopDrawer.addWidget(TitleLabel("删除指定控件"), alignment=Qt.AlignHCenter)
@@ -120,6 +97,35 @@ class SlidingNavigationBarDemo(VerticalScrollWidget):
             self.slidingNavigationBar1.removeItem(self.slidingToolNavigationBar1.allItem()[index].property("routeKey")),
         })
         self.settingPopDrawer.addWidget(comboBox)
+
+    def updateItemColor(self, color: str):
+        self.slidingNavigationBar1.setItemColor(color),
+        self.slidingNavigationBar2.setItemColor(color),
+        self.slidingToolNavigationBar1.setItemColor(color),
+        self.slidingToolNavigationBar2.setItemColor(color)
+
+    def updateHoverColor(self, color: str):
+        self.slidingNavigationBar1.setItemHoverColor(color),
+        self.slidingNavigationBar2.setItemHoverColor(color),
+        self.slidingToolNavigationBar1.setItemHoverColor(color),
+        self.slidingToolNavigationBar2.setItemHoverColor(color)
+
+    def updateSelectedColor(self, color: str):
+        self.slidingNavigationBar1.setItemSelectedColor(color),
+        self.slidingNavigationBar2.setItemSelectedColor(color),
+        self.slidingToolNavigationBar1.setItemSelectedColor(color),
+        self.slidingToolNavigationBar2.setItemSelectedColor(color)
+
+    def updateSize(self, width, height=35):
+        width = int(width)
+        self.slidingNavigationBar1.setItemSize(width, height),
+        self.slidingNavigationBar2.setItemSize(width, height),
+        self.slidingToolNavigationBar1.setItemSize(width, height),
+        self.slidingToolNavigationBar2.setItemSize(width, height)
+
+    def updateIndex(self, index: int):
+        self.slidingNavigationBar1.setCurrentIndex(index)
+        self.slidingToolNavigationBar1.setCurrentIndex(index)
 
     def initNavigationBar(self):
         for icon in self.icons:

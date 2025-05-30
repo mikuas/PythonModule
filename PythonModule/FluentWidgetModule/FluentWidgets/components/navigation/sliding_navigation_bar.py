@@ -76,13 +76,13 @@ class SlidingWidget(QWidget):
         self.__itemColor = color
         self.update()
 
-    def setHoverTextColor(self, color: Union[str, QColor]):
+    def setItemHoverColor(self, color: Union[str, QColor]):
         if self.__hoverColor == color:
             return
         self.__hoverColor = color
         self.update()
 
-    def setSelectedColor(self, color: Union[str, QColor]):
+    def setItemSelectedColor(self, color: Union[str, QColor]):
         if self.__selectedColor == color:
             return
         self.__selectedColor = color
@@ -254,7 +254,7 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
             if item not in self._items:
                 return
             item = self._items[item]
-        if item not in values:
+        if item not in values or item is self.__currentItem:
             return
         for obj in values:
             obj.setSelected(False)
@@ -265,6 +265,8 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         QTimer.singleShot(1, lambda: self.__createPosAni(item))
 
     def setCurrentIndex(self, index: int):
+        if len(self._items.keys()) > index < 0:
+            return
         self.setCurrentWidget(list(self._items.keys())[index])
 
     def addStretch(self, stretch: int):
@@ -300,7 +302,7 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         self._widgetLayout.insertWidget(index, item, alignment=alignment)
         self._items[routeKey] = item
 
-        item.clicked.connect(lambda w: self._onClicked(w))
+        item.clicked.connect(self._onClicked)
         if onClick:
             item.clicked.connect(onClick)
         if isSelected:
@@ -373,7 +375,7 @@ class SlidingToolNavigationBar(SlidingNavigationBar):
         self._widgetLayout.insertWidget(index, item, alignment=alignment)
         self._items[routeKey] = item
 
-        item.clicked.connect(lambda w: self._onClicked(w))
+        item.clicked.connect(self._onClicked)
         if onClick:
             item.clicked.connect(onClick)
         if isSelected:

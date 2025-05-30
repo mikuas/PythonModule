@@ -8,3 +8,4 @@ from .segmented_widget import (SegmentedItem, SegmentedWidget, SegmentedToolItem
                                SegmentedToggleToolItem, SegmentedToggleToolWidget)
 from .breadcrumb import BreadcrumbBar, BreadcrumbItem
 from .sliding_navigation_bar import SlidingLine, SlidingWidget, SlidingNavigationBar, SlidingToolNavigationBar
+from .sliding_navigation_widget import SlidingNavigationWidget

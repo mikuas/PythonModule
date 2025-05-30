@@ -60,9 +60,9 @@ FluentWidgets/components/navigation/navigation_interface.py
 FluentWidgets/components/navigation/navigation_panel.py
 FluentWidgets/components/navigation/navigation_widget.py
 FluentWidgets/components/navigation/pivot.py
-FluentWidgets/components/navigation/segmented_navigation_widget.py
 FluentWidgets/components/navigation/segmented_widget.py
 FluentWidgets/components/navigation/sliding_navigation_bar.py
+FluentWidgets/components/navigation/sliding_navigation_widget.py
 FluentWidgets/components/navigation/test_nav.py
 FluentWidgets/components/navigation/test_nav_widget.py
 FluentWidgets/components/settings/__init__.py
