@@ -32,7 +32,7 @@ class HBoxLayout(QHBoxLayout):
     def addWidgets(self, widgets: List[QWidget], stretch=0, alignment=Qt.AlignTop):
         """ add stretch default is 0, alignment default is None widgets"""
         for widget in widgets:
-            self.addWidget(widget, stretch=stretch, alignment=alignment)
+            self.addWidget(widget, stretch, alignment)
 
     def addLayouts(self, layouts: List[QLayout], stretch=0):
         """ add stretch default is 0 layouts"""

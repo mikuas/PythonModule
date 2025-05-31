@@ -8,7 +8,6 @@ from ...common.config import isDarkTheme
 from ...common.icon import FluentIcon as FIF
 from ...common.style_sheet import FluentStyleSheet
 from .setting_card import SettingCard
-from ..layout.box_layout import VBoxLayout
 
 
 class ExpandButton(QAbstractButton):

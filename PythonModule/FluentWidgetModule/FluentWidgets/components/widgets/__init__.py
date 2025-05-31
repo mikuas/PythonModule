@@ -52,5 +52,4 @@ from .flow_view_widget import FlipViewWidget, FlipItemDelegate
 from .drag_widget import DragFileWidget, DragFolderWidget
 from .drawer_widget import PopDrawerWidget, PopDrawerPosition
 from .toast_info_bar import ToastInfoBar, ToastInfoBarManager, ToastInfoBarPosition, ToastInfoBarColor
-from .custom_widget import Widget, MicaWidget
 from .stacked_widget import PopUpAniStackedWidget, OpacityAniStackedWidget

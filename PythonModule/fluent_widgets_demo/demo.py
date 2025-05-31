@@ -9,41 +9,23 @@ from PySide6.QtWidgets import QApplication, QWidget
 from FluentWidgets import TransparentPushButton, VBoxLayout, FluentIcon
 
 
-class SlidingButtonBase:
-    def __init__(self):
-        super().__init__()
-        self.isHover = False
-        self.isSelected = False
-
-    def enterEvent(self, event):
-        self.isHover = True
-        super().enterEvent(event)
-
-    def leaveEvent(self, event):
-        self.isHover = False
-        self.update()
-        super().leaveEvent(event)
-
-    def setSelected(self, isSelected: bool):
-        self.isSelected = isSelected
-        self.update()
-
-class Button(TransparentPushButton, SlidingButtonBase):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
 class Demo(QWidget):
     def __init__(self):
         super().__init__()
+        self.icon = FluentIcon.HOME
+        self.color = QColor('red')
+        self.icon = self.icon.colored(self.color, self.color)
 
-        self.box = VBoxLayout(self)
-        self.box.addWidget(Button(FluentIcon.HOME, 'hello'))
+    def mouseReleaseEvent(self, event):
+        icon = self.icon
+        color = QColor('red')
+        if self.color == color:
+            print(self.color.name(), color.name())
+            return
+        self.icon = self.icon.colored(color, color)
+        print(self.icon.path(), '\n', self.icon.fluentIcon, '\n', self.icon.qicon())
+        print(self.icon is icon, '\n', icon.fluentIcon is self.icon.fluentIcon)
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setPen(QColor('deeppink'))
-        painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, 'hello world')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -15,6 +15,7 @@ class SlidingNavigationWidget(QWidget):
         self._widgetLayout = QVBoxLayout(self)
         self._slidingNavigationBar = SlidingNavigationBar(self)
         self._stackedWidget = PopUpAniStackedWidget(self)
+        self.__initLayout()
 
     def __initLayout(self):
         self._widgetLayout.addWidget(self._slidingNavigationBar)

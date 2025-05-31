@@ -28,13 +28,13 @@ class SlidingWidget(QWidget):
         self.__hoverColor = None
         self.__selectedColor = None
         self.__iconSize = 16
-        self.__fontMetrics = QFontMetrics(self.font())
+        self._fontMetrics = QFontMetrics(self.font())
         self._adjustSize()
         if icon:
             self.setIcon(icon)
 
     def _adjustSize(self, size=0):
-        self.setMinimumSize(self.__fontMetrics.horizontalAdvance(self.__text) + 32 + size, 35)
+        self.setMinimumSize(self._fontMetrics.horizontalAdvance(self.__text) + 32 + size, 35)
 
     def enterEvent(self, event):
         super().enterEvent(event)
@@ -100,7 +100,7 @@ class SlidingWidget(QWidget):
         else:
             c = self.__itemColor or (255 if isDarkTheme() else 0)
         if self.__icon:
-            x = (self.width() - self.__fontMetrics.horizontalAdvance(self.__text) - self.__iconSize) / 2
+            x = (self.width() - self._fontMetrics.horizontalAdvance(self.__text) - self.__iconSize) / 2
             y = (self.height() - self.__iconSize) / 2
             self._drawIcon(c, painter, QRect(x, y, self.__iconSize, self.__iconSize))
             rect.adjust(x + self.__iconSize + 6, 0, 0, 0)
@@ -121,10 +121,10 @@ class SlidingLine(QFrame):
     def __init__(self, parent=None, color: QColor = None, height=4):
         super().__init__(parent)
         self.setFixedHeight(height)
-        self.__color = color
+        self._color = color
 
     def setLineColor(self, color: Union[str, QColor]):
-        self.__color = QColor(color)
+        self._color = QColor(color)
         self.update()
 
     def paintEvent(self, event):
@@ -132,7 +132,7 @@ class SlidingLine(QFrame):
         painter = QPainter(self)
         painter.setPen(Qt.NoPen)
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.setBrush(self.__color or themeColor())
+        painter.setBrush(self._color or themeColor())
         painter.drawRoundedRect(self.rect(), 2, 2)
 
 
@@ -141,10 +141,10 @@ class SmoothSeparator(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedWidth(6)
-        self.color = None
+        self._color = None
 
     def setSeparatorColor(self, color: Union[str, QColor]):
-        self.color = QColor(color)
+        self._color = QColor(color)
         self.update()
 
     def paintEvent(self, event):
@@ -152,7 +152,7 @@ class SmoothSeparator(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         color = 255 if isDarkTheme() else 0
-        pen = QPen(self.color or QColor(color, color, color, 128), 3)
+        pen = QPen(self._color or QColor(color, color, color, 128), 3)
         pen.setCapStyle(Qt.RoundCap)
         painter.setPen(pen)
         painter.drawLine(2, 10, 2, self.height() - 10)
@@ -174,17 +174,19 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         self.__slidingLine.raise_()
         self.__slidingLine.setFixedSize(self.__slideLineWidth, 3)
         self.__posAni = QPropertyAnimation(self.__slidingLine, b"pos")
-        self.__posAni.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self.__posAni.setEasingCurve(QEasingCurve.OutCubic)
 
+        self.__initScrollArea()
+        self._widgetLayout = QHBoxLayout(self._widget)
+        self.currentItemChanged.connect(lambda w:  w.update())
+        parent.installEventFilter(self)
+
+    def __initScrollArea(self):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.enableTransparentBackground()
         self.setWidgetResizable(True)
         self.setWidget(self._widget)
-
-        self._widgetLayout = QHBoxLayout(self._widget)
-        self.currentItemChanged.connect(lambda w:  w.update())
-        parent.installEventFilter(self)
 
     def __getSlideEndPos(self, item: SlidingWidget):
         pos = item.pos()
@@ -297,7 +299,7 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
     ):
         if routeKey in self._items:
             raise RouteKeyError('routeKey Are Not Unique')
-        item = SlidingWidget(text, icon, parent=self._widget)
+        item = SlidingWidget(text, icon, isSelected, self._widget)
         item.setProperty("routeKey", routeKey)
         self._widgetLayout.insertWidget(index, item, alignment=alignment)
         self._items[routeKey] = item
@@ -370,7 +372,7 @@ class SlidingToolNavigationBar(SlidingNavigationBar):
     ):
         if routeKey in self._items:
             raise RouteKeyError('routeKey Are Not Unique')
-        item = SlidingWidget('', icon, parent=self._widget)
+        item = SlidingWidget('', icon, isSelected, self._widget)
         item.setProperty("routeKey", routeKey)
         self._widgetLayout.insertWidget(index, item, alignment=alignment)
         self._items[routeKey] = item

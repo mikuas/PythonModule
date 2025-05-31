@@ -20,7 +20,11 @@ class Demo(SlidingNavigationWidget):
         super().__init__()
         self.setContentsMargins(0, 0, 0, 0)
         self._widgetLayout.setContentsMargins(0, 0, 0, 0)
-        self._widgetLayout.insertWidget(1, HorizontalSeparator(self))
+
+        # self.separator = HorizontalSeparator(self)
+        # self._widgetLayout.insertWidget(1, self.separator)
+        self._slidingNavigationBar.setStyleSheet('background-color: #f0f3f9')
+
         self.settingPopDrawer = PopDrawerWidget(self, "Navigation Bar Settings", position=PopDrawerPosition.RIGHT)
         self.settingPopDrawer.setClickParentHide(True)
         self.settingPopDrawer.setMinimumWidth(300)
