@@ -1,4 +1,4 @@
 from .components import *
 from .common import *
 from .window import *
-from ._rc import resource_fluent, resource_win_fluent
+from ._rc import resource, win_resource

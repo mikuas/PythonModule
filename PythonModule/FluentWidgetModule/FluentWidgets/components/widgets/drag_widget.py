@@ -13,7 +13,7 @@ class DragFolderWidget(QWidget):
     draggedChange = Signal(list)
     selectionChange = Signal(list)
 
-    def __init__(self, parent=None, defaultDir="./", isDashLine=False):
+    def __init__(self, defaultDir="./", isDashLine=False, parent=None):
         super().__init__(parent)
         self._xRadius = 16
         self._yRadius = 16
@@ -74,10 +74,7 @@ class DragFolderWidget(QWidget):
             pen.setStyle(Qt.PenStyle.DashLine)
             pen.setDashPattern([8, 4])
         painter.setPen(pen)
-
-        rect = self.rect()
-        rect.adjust(2, 2, -2, -2)
-        painter.drawRoundedRect(rect, self._xRadius, self._yRadius)
+        painter.drawRoundedRect(self.rect().adjust(2, 2, -2, -2), self._xRadius, self._yRadius)
 
     def dragEnterEvent(self, event):
         super().dragEnterEvent(event)
@@ -106,13 +103,13 @@ class DragFileWidget(DragFolderWidget):
     """ get dray file widget """
     def __init__(
             self,
-            parent=None,
             defaultDir="./",
             fileFilter="所有文件 (*.*);; 文本文件 (*.txt)",
-            isDashLine=False
+            isDashLine=False,
+            parent=None
     ):
         """ 多个文件类型用;;分开 """
-        super().__init__(parent, defaultDir, isDashLine)
+        super().__init__(defaultDir, isDashLine, parent)
         self.label.setContentsMargins(12, 0, 0, 0)
         self.setLabelText("拖动任意文件到此")
         self.button.setText("选择文件")

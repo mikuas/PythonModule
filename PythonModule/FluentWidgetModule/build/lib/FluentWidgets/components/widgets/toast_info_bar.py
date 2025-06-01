@@ -2,7 +2,7 @@
 from enum import Enum
 from typing import Union, List
 
-from PySide6.QtCore import Qt, QSize, QPropertyAnimation, QPoint, QTimer, QObject, QEvent, Signal
+from PySide6.QtCore import Qt, QSize, QPropertyAnimation, QPoint, QTimer, QObject, QEvent, Signal, QEasingCurve
 from PySide6.QtGui import QPainter, QColor
 from PySide6.QtWidgets import QFrame,  QGraphicsOpacityEffect, QWidget
 
@@ -105,6 +105,7 @@ class ToastInfoBar(QFrame):
 
     def __createPosAni(self):
         self.__geometryAni = QPropertyAnimation(self, b'pos')
+        self.__geometryAni.setEasingCurve(QEasingCurve.OutQuad)
         self.__geometryAni.setDuration(200)
         self.__geometryAni.setStartValue(self.startPosition)
         self.__geometryAni.setEndValue(self.endPosition)
