@@ -14,7 +14,6 @@ class SingleScrollWidgetBase(SingleDirectionScrollArea):
         self.boxLayout = None
         self.setWidget(self._widget)
         self.setWidgetResizable(True)
-        self.enableTransparentBackground()
 
     def addWidget(self, widget: QWidget, stretch=0, alignment=Qt.AlignmentFlag(0)):
         self.boxLayout.addWidget(widget, stretch, alignment)

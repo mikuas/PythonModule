@@ -93,6 +93,7 @@ FluentWidgets/components/widgets/pips_pager.py
 FluentWidgets/components/widgets/popup_drawer_widget.py
 FluentWidgets/components/widgets/progress_bar.py
 FluentWidgets/components/widgets/progress_ring.py
+FluentWidgets/components/widgets/round_list_widget.py
 FluentWidgets/components/widgets/scroll_area.py
 FluentWidgets/components/widgets/scroll_bar.py
 FluentWidgets/components/widgets/scroll_widget.py

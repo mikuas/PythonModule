@@ -170,10 +170,10 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         self._widget.setStyleSheet("background:transparent;")
         self.__currentItem = None # type: SlidingWidget
         self.__slideLineWidth = 30
-        self.__slidingLine = SlidingLine(self._widget)
-        self.__slidingLine.raise_()
-        self.__slidingLine.setFixedSize(self.__slideLineWidth, 3)
-        self.__posAni = QPropertyAnimation(self.__slidingLine, b"pos")
+        self._slidingLine = SlidingLine(self._widget)
+        self._slidingLine.raise_()
+        self._slidingLine.setFixedSize(self.__slideLineWidth, 3)
+        self.__posAni = QPropertyAnimation(self._slidingLine, b"pos")
         self.__posAni.setEasingCurve(QEasingCurve.OutCubic)
 
         self.__initScrollArea()
@@ -198,12 +198,12 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
 
     def __createPosAni(self, item: SlidingWidget):
         self.__posAni.setDuration(200)
-        self.__posAni.setStartValue(self.__slidingLine.pos())
+        self.__posAni.setStartValue(self._slidingLine.pos())
         self.__posAni.setEndValue(self.__getSlideEndPos(item))
         self.__posAni.start()
 
     def __adjustSlideLinePos(self):
-        QTimer.singleShot(1, lambda: (self.__slidingLine.move(self.__getSlideEndPos(self.__currentItem))))
+        QTimer.singleShot(1, lambda: (self._slidingLine.move(self.__getSlideEndPos(self.__currentItem))))
 
     def _onClicked(self, item: SlidingWidget):
         self.setCurrentWidget(item)
@@ -221,29 +221,29 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
 
     def setSlideLineWidth(self, width: int):
         self.__slideLineWidth = width
-        self.__slidingLine.setFixedWidth(self.__slideLineWidth)
+        self._slidingLine.setFixedWidth(self.__slideLineWidth)
         self.__adjustSlideLinePos()
 
     def setSlideLineColor(self, color: Union[str, QColor]):
-        self.__slidingLine.setLineColor(color)
+        self._slidingLine.setLineColor(color)
 
-    def __make(self, name: str, *args, **kwargs):
+    def __function(self, name: str, *args, **kwargs):
         for item in self._items.values():
             method = getattr(item, name, None)
             if callable(method):
                 method(*args, **kwargs)
 
     def setItemSelectedColor(self, color: Union[str, QColor]):
-        self.__make("setItemSelectedColor", color)
+        self.__function("setItemSelectedColor", color)
 
     def setItemColor(self, color: Union[str, QColor]):
-        self.__make("setItemColor", color)
+        self.__function("setItemColor", color)
 
     def setItemHoverColor(self, color: Union[str, QColor]):
-        self.__make("setItemHoverColor", color)
+        self.__function("setItemHoverColor", color)
 
     def setItemSize(self, width: int, height: int):
-        self.__make("setFixedSize", width, height)
+        self.__function("setFixedSize", width, height)
 
     @overload
     def setCurrentWidget(self, item: str): ...

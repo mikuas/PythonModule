@@ -1,10 +1,10 @@
 # coding:utf-8
 from PySide6.QtCore import QSize, Signal, QFileInfo, Qt
 from PySide6.QtGui import QPainter, QPen, QColor
-from PySide6.QtWidgets import QFileDialog, QWidget, QLabel
+from PySide6.QtWidgets import QFileDialog, QWidget, QLabel, QVBoxLayout
 
-from ..layout import VBoxLayout
 from ...common import setFont
+from ...common.color import themeColor
 from ..widgets import HyperlinkButton
 
 
@@ -13,27 +13,30 @@ class DragFolderWidget(QWidget):
     draggedChange = Signal(list)
     selectionChange = Signal(list)
 
-    def __init__(self, defaultDir="./", isDashLine=False, parent=None):
+    def __init__(self, defaultDir=".\\", isDashLine=False, parent=None):
         super().__init__(parent)
         self._xRadius = 16
         self._yRadius = 16
         self.__lineWidth = 1
         self._defaultDir = defaultDir
-        self.__lineColor = QColor("#4AA3EE")
+        self.__lineColor = None
         self.__enableDashLine = isDashLine
-        self.vBoxLayout = VBoxLayout(self)
+        self.vBoxLayout = QVBoxLayout(self)
         self.setAcceptDrops(True)
         self.setMinimumSize(QSize(256, 200))
 
         self.label = QLabel("拖动文件夹到此", self)
-        self.orLabel = QLabel("或", self)
+        self.__orLabel = QLabel("或", self)
 
         self.button = HyperlinkButton('', "选择文件夹", self)
-        for w in [self.button, self.label, self.orLabel]:
+        for w in [self.button, self.label, self.__orLabel]:
             setFont(w, 15)
 
-        self.vBoxLayout.addWidgets([self.label, self.orLabel, self.button])
-        self.vBoxLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label.setAlignment(Qt.AlignHCenter)
+        self.vBoxLayout.addWidget(self.label)
+        self.vBoxLayout.addWidget(self.__orLabel)
+        self.vBoxLayout.addWidget(self.button)
+        self.vBoxLayout.setAlignment(Qt.AlignCenter)
 
         self.button.clicked.connect(self._showDialog)
 
@@ -65,16 +68,24 @@ class DragFolderWidget(QWidget):
         self.__lineWidth = width
         self.update()
 
+    @property
+    def xRadius(self):
+        return self._xRadius
+
+    @property
+    def yRadius(self):
+        return self._yRadius
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        pen = QPen(self.__lineColor)
+        pen = QPen(self.__lineColor or themeColor())
         pen.setWidth(self.__lineWidth)
         if self.__enableDashLine:
             pen.setStyle(Qt.PenStyle.DashLine)
             pen.setDashPattern([8, 4])
         painter.setPen(pen)
-        painter.drawRoundedRect(self.rect().adjust(2, 2, -2, -2), self._xRadius, self._yRadius)
+        painter.drawRoundedRect(self.rect().adjusted(2, 2, -2, -2), self.xRadius, self.yRadius)
 
     def dragEnterEvent(self, event):
         super().dragEnterEvent(event)
@@ -96,14 +107,14 @@ class DragFolderWidget(QWidget):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.orLabel.setContentsMargins(int(self.label.width() / 2.2), 0, 0, 0)
+        self.__orLabel.setContentsMargins(int(self.label.width() / 2.2), 0, 0, 0)
 
 
 class DragFileWidget(DragFolderWidget):
     """ get dray file widget """
     def __init__(
             self,
-            defaultDir="./",
+            defaultDir=".\\",
             fileFilter="所有文件 (*.*);; 文本文件 (*.txt)",
             isDashLine=False,
             parent=None
