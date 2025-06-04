@@ -1067,6 +1067,7 @@ class OutlinePushButton(QAbstractButton):
         self.__isPressed = False
         self.__outlineColor = None # type: QColor
         setFont(self)
+        self.setIcon(None)
         self.setAttribute(Qt.WA_StaticContents)
         self.setFixedHeight(35)
         self.setIconSize(QSize(16, 16))
@@ -1143,7 +1144,6 @@ class OutlinePushButton(QAbstractButton):
             size = self.iconSize().width()
             x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size) / 2
             y = (self.height() - size) / 2
-            print(x, y)
             drawIcon(self._icon, painter, QRect(x, y, size, size))
             rect.adjust(x + size + 6, 0, 0, 0)
             align = Qt.AlignVCenter
@@ -1168,6 +1168,3 @@ class OutlineToolButton(OutlinePushButton):
     def setText(self, text): ...
 
     def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment): ...
-
-    def paintEvent(self, event):
-        OutlinePushButton.paintEvent(self, event)
