@@ -18,4 +18,8 @@ def createQrcFile(resourceDir, outputQrcPath, prefix="/"):
     print(f"✅ QRC 文件已写入到: {outputQrcPath}")
 
 if __name__ == '__main__':
-    createQrcFile("date", "date/resources.qrc")
+    createQrcFile(
+        "date/",
+        "date/icon_resources.qrc",
+        "/icons"
+    )

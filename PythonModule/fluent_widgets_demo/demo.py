@@ -2,29 +2,32 @@
 
 import sys
 
-from PySide6.QtGui import QPainter, QColor, Qt
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QPainter, QColor, Qt, QIcon
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
 
 
-from FluentWidgets import TransparentPushButton, VBoxLayout, FluentIcon
+from FluentWidgets import TransparentPushButton, VBoxLayout, FluentIcon, OutlinePushButton, OutlineToolButton, Icon, setFont
+
+from FluentWidgets.components.widgets.button import RoundToolButton, RoundPushButton
+
 
 
 class Demo(QWidget):
     def __init__(self):
         super().__init__()
-        self.icon = FluentIcon.HOME
-        self.color = QColor('red')
-        self.icon = self.icon.colored(self.color, self.color)
+        self.box = QVBoxLayout(self)
 
-    def mouseReleaseEvent(self, event):
-        icon = self.icon
-        color = QColor('red')
-        if self.color == color:
-            print(self.color.name(), color.name())
-            return
-        self.icon = self.icon.colored(color, color)
-        print(self.icon.path(), '\n', self.icon.fluentIcon, '\n', self.icon.qicon())
-        print(self.icon is icon, '\n', icon.fluentIcon is self.icon.fluentIcon)
+        self.opb = OutlinePushButton("OutlinePushButton", self, FluentIcon.HOME)
+        self.otb = OutlineToolButton(FluentIcon.GITHUB, self)
+
+        self.rpb = RoundPushButton("RoundPushButton", self, FluentIcon.HOME)
+        self.rtb = RoundToolButton(FluentIcon.SETTING, self)
+
+        self.box.addWidget(self.opb)
+        self.box.addWidget(self.otb)
+        self.box.addWidget(self.rpb)
+        self.box.addWidget(self.rtb)
 
 
 if __name__ == '__main__':

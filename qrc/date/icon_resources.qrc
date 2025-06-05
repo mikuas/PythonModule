@@ -1,0 +1,12 @@
+<!DOCTYPE RCC><RCC version="1.0">
+  <qresource prefix="/icons">
+    <file>ATRI.jpg</file>
+    <file>Genshin_Impact.ico</file>
+    <file>Honkai_Impact_3.ico.ico</file>
+    <file>Honkai_Star_Rail.ico</file>
+    <file>icon_resources.qrc</file>
+    <file>p1.jpg</file>
+    <file>p2.jpg</file>
+    <file>xier.jpg</file>
+  </qresource>
+</RCC>

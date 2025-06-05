@@ -6,20 +6,20 @@ from PySide6.QtCore import Qt
 
 from FluentWidgets import SplitWidget, OutlinePushButton, OutlineToolButton, ImageLabel, SwitchButton, FluentIcon, \
     TitleLabel, \
-    ColorDialog, themeColor, PrimaryPushButton
+    ColorDialog, themeColor, PrimaryPushButton, PopupDrawerWidget
 
-import images_resources
+import icon_resources
 
 
 class OutlineButtonDemo(SplitWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("OutlineButtonDemo")
-        self.setWindowIcon(QIcon(":/images/genshin.ico"))
+        self.setWindowIcon(QIcon(":/icons/Honkai_Star_Rail.ico"))
         self.windowEffect.setMicaEffect(self.winId(), isAlt=True)
 
         self.mainLayout = QHBoxLayout(self)
-        self.imageLabel = ImageLabel(":/images/xier.jpg", self)
+        self.imageLabel = ImageLabel(":/icons/xier.jpg", self)
         self.imageLabel.setFixedSize(self.width() / 2.5, self.height())
         self.mainLayout.addWidget(self.imageLabel, 0, Qt.AlignLeft)
 
@@ -28,20 +28,21 @@ class OutlineButtonDemo(SplitWidget):
         self.widgetLayout.setContentsMargins(0, 50, 10, 0)
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
 
+        self.drawer = PopupDrawerWidget(self, "OutlineButton设置")
+        self.button = PrimaryPushButton("设置", self)
+
+        self.button.clicked.connect(self.showDrawer)
         self.initOutlineButton()
 
-        self.button = PrimaryPushButton("设置OutlineButton边框颜色", self)
-        self.selectedAllButton = PrimaryPushButton("选择全部按钮", self)
-        self.colorDialog = ColorDialog(themeColor(), '设置OutlineButton边框颜色', self)
-
-        self.colorDialog.hide()
-
-        self.button.clicked.connect(self.colorDialog.show)
-        self.selectedAllButton.clicked.connect(self.selectedAll)
+        self.colorDialog = ColorDialog(themeColor(), "选择OutlineButton边框颜色", self)
         self.colorDialog.colorChanged.connect(self.updateButtonColor)
+        self.colorDialog.hide()
+        self.initDrawer()
 
-        self.widgetLayout.addWidget(self.button, 1, Qt.AlignTop)
-        self.widgetLayout.addWidget(self.selectedAllButton, 1, Qt.AlignTop)
+        self.widgetLayout.addWidget(self.button)
+
+    def showDrawer(self):
+        self.drawer.popDrawer(self.drawer.isPopup)
 
     def selectedAll(self):
         if self.buttonGroup.exclusive():
@@ -52,6 +53,29 @@ class OutlineButtonDemo(SplitWidget):
     def updateButtonColor(self, color):
         for button in self.buttonGroup.buttons():
             button.setOutlineColor(color)
+
+    def initDrawer(self):
+        self.drawer.setFixedWidth(350)
+        self.drawer.setClickParentHide(True)
+
+        self.borderColorButton = PrimaryPushButton("设置OutlineButton边框颜色")
+        self.selectedAllButton = PrimaryPushButton("选择全部按钮")
+
+        self.buttonGroup.setExclusive(False)
+        self.switch = SwitchButton(self)
+
+        switchLayout = QHBoxLayout()
+        switchLayout.addWidget(TitleLabel("启用单选"), 1, Qt.AlignHCenter | Qt.AlignTop)
+        switchLayout.addWidget(self.switch, 1, Qt.AlignHCenter | Qt.AlignTop)
+
+        self.borderColorButton.clicked.connect(self.colorDialog.show)
+        self.selectedAllButton.clicked.connect(self.selectedAll)
+        self.switch.checkedChanged.connect(self.updateButtonGroup)
+
+        self.drawer.vBoxLayout.addSpacing(50)
+        self.drawer.addLayout(switchLayout)
+        self.drawer.addWidget(self.borderColorButton)
+        self.drawer.addWidget(self.selectedAllButton)
 
     def initOutlineButton(self):
         self.buttonGroup = QButtonGroup(self)
@@ -71,14 +95,6 @@ class OutlineButtonDemo(SplitWidget):
                 self.buttonGroup.addButton(button)
                 layout.addWidget(button)
             self.widgetLayout.addLayout(layout, 1)
-
-        self.buttonGroup.setExclusive(False)
-        self.switch = SwitchButton(self)
-        switchLayout = QHBoxLayout()
-        switchLayout.addWidget(TitleLabel("启用单选"), 1, Qt.AlignHCenter | Qt.AlignTop)
-        switchLayout.addWidget(self.switch, 1, Qt.AlignHCenter | Qt.AlignTop)
-        self.widgetLayout.addLayout(switchLayout)
-        self.switch.checkedChanged.connect(self.updateButtonGroup)
 
     def updateButtonGroup(self, exclusive):
         self.buttonGroup.setExclusive(exclusive)

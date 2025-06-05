@@ -1,16 +1,9 @@
 # coding:utf-8
 
-item = {
-    'a': 1,
-    'b': 2,
-    'c': 3
-}
+def get():
+    return 1, 2
 
-if 'a' in item:
-    print(True)
 
-if 'a' in item.keys():
-    print(True)
+a, b = get()
 
-if 1 in item:
-    print(True)
+print(a, b)

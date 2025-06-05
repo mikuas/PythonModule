@@ -1,9 +1,0 @@
-<!DOCTYPE RCC><RCC version="1.0">
-  <qresource prefix="/">
-    <file>ATRI.jpg</file>
-    <file>p1.jpg</file>
-    <file>p2.jpg</file>
-    <file>resources.qrc</file>
-    <file>xier.jpg</file>
-  </qresource>
-</RCC>

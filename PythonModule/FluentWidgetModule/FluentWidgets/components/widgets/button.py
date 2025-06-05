@@ -1047,36 +1047,33 @@ class PillToolButton(ToggleToolButton, PillButtonBase):
         PillButtonBase.paintEvent(self, e)
         ToggleToolButton.paintEvent(self, e)
 
+# New ---------------------------------------------------------------------------------------------------- New #
 
-class OutlinePushButton(QAbstractButton):
-    """ Outline PushButton
+
+class RoundPushButton(QAbstractButton):
+    """ Round PushButton
 
     Constructors
     ------------
-    * OutlinePushButton(`parent`: QWidget = None)
-    * OutlinePushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
-    * OutlinePushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * RoundPushButton(`parent`: QWidget = None)
+    * RoundPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
+    * RoundPushButton(`icon`: QIcon | FluentIcon, `parent`: QWidget = None, 'text': str = "")
     """
-
-    checkedChange = Signal(bool)
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        self.__isHover = False
-        self.__isPressed = False
-        self.__outlineColor = None # type: QColor
+        self.isHover = False
+        self._xRadius = 16
+        self._yRadius = 16
         setFont(self)
         self.setIcon(None)
-        self.setAttribute(Qt.WA_StaticContents)
         self.setFixedHeight(35)
         self.setIconSize(QSize(16, 16))
-        self.setCheckable(True)
         self._fontMetrics = QFontMetrics(self.font())
-        self.toggled.connect(lambda b: self.setChecked(b))
 
     @__init__.register
-    def _(self, text: str, parent: QWidget = None, icon: Union[QIcon, str, FluentIconBase] = None):
+    def _(self, text: str, parent: QWidget = None, icon: Union[str, QIcon, FluentIconBase] = None):
         self.__init__(parent=parent)
         self.setText(text)
         self.setIcon(icon)
@@ -1086,13 +1083,28 @@ class OutlinePushButton(QAbstractButton):
         self.__init__(text, parent, icon)
 
     @__init__.register
-    def _(self, icon: FluentIconBase, parent: QWidget = None, text: str = ''):
+    def _(self, icon: QIcon, parent: QWidget = None, text: str = ""):
         self.__init__(text, parent, icon)
 
-    def setOutlineColor(self, color: str | QColor):
-        if isinstance(color, str):
-            color = QColor(color)
-        self.__outlineColor = color
+    @__init__.register
+    def _(self, icon: FluentIconBase, parent: QWidget = None, text: str = ""):
+        self.__init__(text, parent, icon)
+
+    def setXRadius(self, radius: int):
+        if self._xRadius == radius:
+            return
+        self._xRadius = radius
+        self.update()
+
+    def setYRadius(self, radius: int):
+        if self._yRadius == radius:
+            return
+        self._yRadius = radius
+        self.update()
+
+    @property
+    def radius(self):
+        return self._xRadius, self._yRadius
 
     def setIcon(self, icon: Union[QIcon, str, FluentIconBase]):
         self.setProperty('hasIcon', icon is not None)
@@ -1104,51 +1116,111 @@ class OutlinePushButton(QAbstractButton):
 
     def enterEvent(self, event):
         super().enterEvent(event)
-        self.__isHover = True
+        self.isHover = True
         self.update()
 
     def leaveEvent(self, event):
         super().leaveEvent(event)
-        self.__isHover = False
-        self.update()
-
-    def mousePressEvent(self, e):
-        super().mousePressEvent(e)
-        self.__isPressed = True
-
-    def mouseReleaseEvent(self, e):
-        super().mouseReleaseEvent(e)
-        self.__isPressed = False
-
-    def setChecked(self, isChecked: bool):
-        super().setChecked(isChecked)
-        self.checkedChange.emit(isChecked)
+        self.isHover = False
         self.update()
 
     def paintEvent(self, event):
         painter = QPainter(self)
         rect = self.rect()
-        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
-        c = 255 if isDarkTheme() else 0
-        bc = (self.__outlineColor or themeColor()) if self.isChecked() else QColor(c, c, c, 24)
-        align = Qt.AlignCenter
-        pen = QPen(bc)
+        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing)
+        color = self._drawBorder(painter, rect)
+        alignment = Qt.AlignmentFlag.AlignCenter
+        if not self.icon().isNull():
+            rect, alignment = self._drawIcon(painter, rect, color)
+        self._drawText(painter, color, rect, alignment)
+
+    def _drawBorder(self, painter: QPainter, rect: QRect):
+        color = QColor(255, 255, 255) if isDarkTheme() else QColor(0, 0, 0)
+        pen = QPen(color)
         pen.setWidthF(1.5)
         painter.setPen(pen)
-        painter.setOpacity(0.768 if self.__isHover else 1.0)
-        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), 16, 16)
-        if not self.icon().isNull():
-            # draw icon
-            if isinstance(self._icon, FluentIconBase):
-                self._icon = self._icon.colored(bc, bc)
-            size = self.iconSize().width()
-            x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size) / 2
-            y = (self.height() - size) / 2
-            drawIcon(self._icon, painter, QRect(x, y, size, size))
-            rect.adjust(x + size + 6, 0, 0, 0)
-            align = Qt.AlignVCenter
-        # draw text
-        self._drawText(painter, bc, rect, align)
+        painter.setOpacity(0.768 if self.isHover else 1.0)
+        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), *self.radius)
+        return color
+
+    def _drawIcon(self, painter: QPainter, rect: QRect, color: QColor):
+        size = self.iconSize().width()
+        if self.text():
+            x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size * 2) / 2
+        else:
+            x = (self.width() - size) / 2
+        y = (self.height() - size) / 2
+        drawIcon(self._icon, painter, QRect(x, y, size, size))
+        rect.adjust(x + size + 6, 0, 0, 0)
+        return rect, Qt.AlignVCenter
+
+    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment: Qt.AlignmentFlag):
+        painter.setPen(color)
+        painter.drawText(rect, alignment, self.text())
+
+
+class RoundToolButton(RoundPushButton):
+    """ Round ToolButton
+
+    Constructors
+    ------------
+    * RoundToolButton(`parent`: QWidget = None)
+    * RoundToolButton(`icon`: QIcon | FluentIcon, `parent`: QWidget = None)
+    """
+
+    def setText(self, text): ...
+
+    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, align: Qt.AlignmentFlag): ...
+
+
+class OutlineButtonBase:
+
+    checkedChange = Signal(bool)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._outlineColor = None # type: QColor
+        self._lastColor = None # type: QColor
+        self.setCheckable(True)
+        self.toggled.connect(self.setChecked)
+
+    def _drawIcon(self, painter: QPainter, rect: QRect, color: QColor):
+        if isinstance(self._icon, FluentIconBase) and self._lastColor != color:
+            self._icon = self._icon.colored(color, color)
+            self._lastColor = QColor(color)
+            print("colored")
+        super()._drawIcon(painter, rect, color)
+
+    def _drawBorder(self, painter: QPainter, rect: QRect):
+        color = 255 if isDarkTheme() else 0
+        color = (self._outlineColor or themeColor()) if self.isChecked() else QColor(color, color, color, 24)
+        pen = QPen(color)
+        pen.setWidthF(1.5)
+        painter.setPen(pen)
+        painter.setOpacity(0.768 if self.isHover else 1.0)
+        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), *self.radius)
+        return color
+
+
+class OutlinePushButton(RoundPushButton, OutlineButtonBase):
+    """ Outline PushButton
+
+    Constructors
+    ------------
+    * OutlinePushButton(`parent`: QWidget = None)
+    * OutlinePushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
+    * OutlinePushButton(`icon`: QIcon | FluentIcon, `parent`: QWidget = None, 'text': str = "")
+    """
+
+    def setOutlineColor(self, color: str | QColor):
+        if isinstance(color, str):
+            color = QColor(color)
+        self._outlineColor = color
+
+    def setChecked(self, isChecked: bool):
+        super().setChecked(isChecked)
+        self.checkedChange.emit(isChecked)
+        self.update()
 
     def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment):
         color.setAlpha(255)
@@ -1156,7 +1228,7 @@ class OutlinePushButton(QAbstractButton):
         painter.drawText(rect, alignment, self.text())
 
 
-class OutlineToolButton(OutlinePushButton):
+class OutlineToolButton(RoundToolButton, OutlineButtonBase):
     """ Outline ToolButton
 
     Constructors
@@ -1164,7 +1236,3 @@ class OutlineToolButton(OutlinePushButton):
     * OutlineToolButton(`parent`: QWidget = None)
     * OutlineToolButton(`icon`: QIcon | FluentIcon, `parent`: QWidget = None)
     """
-
-    def setText(self, text): ...
-
-    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment): ...
