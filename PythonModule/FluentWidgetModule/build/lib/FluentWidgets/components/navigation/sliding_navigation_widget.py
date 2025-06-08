@@ -12,14 +12,14 @@ from ..widgets.stacked_widget import PopUpAniStackedWidget
 class SlidingNavigationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._widgetLayout = QVBoxLayout(self)
+        self.widgetLayout = QVBoxLayout(self)
         self.navigation = SlidingNavigationBar(self)
         self.stackedWidget = PopUpAniStackedWidget(self)
         self.__initLayout()
 
     def __initLayout(self):
-        self._widgetLayout.addWidget(self.navigation)
-        self._widgetLayout.addWidget(self.stackedWidget)
+        self.widgetLayout.addWidget(self.navigation)
+        self.widgetLayout.addWidget(self.stackedWidget)
 
     def _switchTo(self, widget: QWidget):
         self.stackedWidget.setCurrentWidget(widget)

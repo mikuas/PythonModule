@@ -6,21 +6,19 @@ from typing import List
 
 from FluentWidgets import Icon, FluentIcon, themeColor, setThemeColor, qconfig, isDarkTheme, setTheme, Theme, LineEdit
 from PySide6.QtGui import QFont, Qt, QPainter, QColor, QPen, QIcon, QPixmap
-from PySide6.QtCore import QSize, QMimeData, QPoint, QPropertyAnimation, QEasingCurve
+from PySide6.QtCore import QSize, QMimeData, QPoint, QPropertyAnimation, QEasingCurve, QRect
 from PySide6.QtWidgets import QApplication, QWidget, QStyle, QListWidget, QListWidgetItem, QStyledItemDelegate, \
     QVBoxLayout, QPushButton, QAbstractItemView, QScroller, QSizePolicy, QHBoxLayout
 
 
 class RoundListWidgetItemDelegate(QStyledItemDelegate):
-    def __init__(self, isFull=False, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.__isFull = isFull
-        self.__color = None         # type: QColor
-        self.__textColor = None     # type: QColor
 
     def createEditor(self, parent, option, index):
         editor = LineEdit(parent)
         editor.setFixedHeight(option.rect.height())
+        editor.setClearButtonEnabled(True)
         return editor
 
     def setEditorData(self, editor, index):
@@ -29,46 +27,28 @@ class RoundListWidgetItemDelegate(QStyledItemDelegate):
     def setModelData(self, editor, model, index):
         model.setData(index, editor.text(), Qt.EditRole)
 
-    def setIsFull(self, isFull: bool):
-        self.__isFull = isFull
-
-    def setColor(self, color: str | QColor):
-        self.__color = QColor(color)
-
-    def setTextColor(self, textColor: str | QColor):
-        self.__textColor = QColor(textColor)
-
     def paint(self, painter, option, index):
         painter.save()
 
         # 设置背景
         rect = option.rect.adjusted(2, 2, -2, -2)
         isDark = isDarkTheme()
-        textColor = self.__textColor or (QColor("#000000") if isDark else QColor("#ffffff"))
         if option.state & (QStyle.StateFlag.State_Selected | QStyle.StateFlag.State_MouseOver):
             color = self.__color or themeColor()
         else:
             color = QColor("#000000") if isDark else QColor("#E8E8E8")
-            textColor = self.__textColor or (QColor("#ffffff") if isDark else QColor("#000000"))
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.TextAntialiasing)
-        if self.__isFull:
-            painter.setPen(Qt.NoPen)
-            painter.setBrush(color)
-        else:
-            pen = QPen(color)
-            pen.setWidth(2)
-            painter.setPen(pen)
-            textColor = self.__textColor or (QColor("#ffffff") if isDark else QColor("#000000"))
-        painter.drawRoundedRect(rect, 8, 8)
+        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing)
 
-        # 设置字体
-        alignment = index.data(Qt.ItemDataRole.TextAlignmentRole) or Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-        text = index.data()
-        painter.setPen(textColor)
-        painter.setFont(QFont("微软雅黑", 12))
-        painter.drawText(rect.adjusted(10, 0, -10, 0), alignment, text)
-
+        self._drawText()
         painter.restore()
+
+    def _drawText(self, painter: QPainter, rect: QRect, index):
+        text = index.data()
+        alignment = index.data(Qt.TextAlignmentRole) or Qt.AlignLeft | Qt.AlignVCenter
+        color = 255 if isDarkTheme() else 0
+        painter.setPen(QColor(color, color, color))
+        painter.setFont(QFont("Microsoft YaHei Ui", 14))
+        painter.drawText(rect.adjusted(10, 0, -10, 0), alignment, text)
 
 
 class RoundListWidget(QListWidget):

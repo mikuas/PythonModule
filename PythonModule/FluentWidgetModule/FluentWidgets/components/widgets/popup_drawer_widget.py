@@ -22,11 +22,11 @@ class PopupDrawerWidget(QFrame):
 
     def __init__(
             self,
-            parent,
             title="PopDrawer",
             duration=300,
             aniType=QEasingCurve.OutCubic,
-            position=PopupDrawerPosition.LEFT
+            position=PopupDrawerPosition.LEFT,
+            parent=None
     ):
         super().__init__(parent)
         # Linear

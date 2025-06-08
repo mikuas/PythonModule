@@ -22,11 +22,11 @@ class PopupDrawerWidget(QFrame):
 
     def __init__(
             self,
-            parent,
             title="PopDrawer",
             duration=300,
             aniType=QEasingCurve.OutCubic,
-            position=PopupDrawerPosition.LEFT
+            position=PopupDrawerPosition.LEFT,
+            parent=None
     ):
         super().__init__(parent)
         # Linear
@@ -49,13 +49,13 @@ class PopupDrawerWidget(QFrame):
         self.__initShadowEffect()
 
     def __initLayout(self):
-        self.__vBoxLayout = VBoxLayout(self)
-        self.__titleLayout = HBoxLayout(self)
-        self.__vBoxLayout.insertLayout(0, self.__titleLayout)
-        self.__vBoxLayout.setAlignment(Qt.AlignTop)
+        self.vBoxLayout = VBoxLayout(self)
+        self.titleLayout = HBoxLayout()
+        self.vBoxLayout.insertLayout(0, self.titleLayout)
+        self.vBoxLayout.setAlignment(Qt.AlignTop)
 
-        self.__titleLayout.addWidget(self._title)
-        self.__titleLayout.addWidget(self._closeButton, alignment=Qt.AlignRight)
+        self.titleLayout.addWidget(self._title)
+        self.titleLayout.addWidget(self._closeButton, alignment=Qt.AlignRight)
 
     def __initWidget(self, title):
         self._title = SubtitleLabel(title, self)
@@ -66,11 +66,11 @@ class PopupDrawerWidget(QFrame):
         self._closeButton.clicked.connect(lambda: self.popDrawer(True))
 
     def __initShadowEffect(self):
-        self.shadow = QGraphicsDropShadowEffect(self)
-        self.shadow.setBlurRadius(24)
-        self.shadow.setOffset(0, 0)
-        self.shadow.setColor(QColor(0, 0, 0, 128))
-        self.setGraphicsEffect(self.shadow)
+        self._shadow = QGraphicsDropShadowEffect(self)
+        self._shadow.setBlurRadius(24)
+        self._shadow.setOffset(0, 0)
+        self._shadow.setColor(QColor(0, 0, 0, 128))
+        self.setGraphicsEffect(self._shadow)
 
     def __adjustDrawer(self):
         self.setGeometry(*self.drawerManager.newGeometry(self.__isPopup))
@@ -87,10 +87,10 @@ class PopupDrawerWidget(QFrame):
 
     def addWidget(self, widget: QWidget, stretch=0, alignment=Qt.AlignmentFlag.AlignTop):
         """ add widget to layout """
-        self.__vBoxLayout.addWidget(widget, stretch, alignment)
+        self.vBoxLayout.addWidget(widget, stretch, alignment)
 
     def addLayout(self, layout: QLayout, stretch=0):
-        self.__vBoxLayout.addLayout(layout, stretch)
+        self.vBoxLayout.addLayout(layout, stretch)
 
     def setTitleText(self, text: str):
         self._title.setText(text)
@@ -113,10 +113,6 @@ class PopupDrawerWidget(QFrame):
 
     def getBackgroundColor(self):
         return self.__darkBgcColor if isDarkTheme() else self.__lightBgcColor
-
-    @property
-    def titleLayout(self):
-        return self.__titleLayout
 
     @property
     def xRadius(self):
@@ -142,6 +138,7 @@ class PopupDrawerWidget(QFrame):
         if obj is self.parent():
             if event.type() in [QEvent.Resize, QEvent.WindowStateChange]:
                 self.__adjustDrawer()
+                self.raise_()
             if self.__clickParentHide and event.type() == QEvent.MouseButtonPress:
                 self.popDrawer(True)
         return super().eventFilter(obj, event)

@@ -11,7 +11,7 @@ class SplitWidget(FramelessWindow):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setTitleBar(SplitTitleBar(self))
+        self.titleBar.raise_()
 
         if sys.platform == "darwin":
             self.titleBar.setFixedHeight(48)
-        self.titleBar.raise_()

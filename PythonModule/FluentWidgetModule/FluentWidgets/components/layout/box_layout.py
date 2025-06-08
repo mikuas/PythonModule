@@ -11,7 +11,7 @@ class HBoxLayout(QHBoxLayout):
         super().__init__(parent)
         self.widgets = []
 
-    def addWidget(self, widget: QWidget, stretch=0, alignment=Qt.AlignTop):
+    def addWidget(self, widget: QWidget, stretch=0, alignment=Qt.AlignmentFlag(0)):
         super().addWidget(widget, stretch, alignment)
         self.widgets.append(widget)
 
@@ -29,13 +29,13 @@ class HBoxLayout(QHBoxLayout):
             super().removeWidget(w)
         self.widgets.clear()
 
-    def addWidgets(self, widgets: List[QWidget], stretch=0, alignment=Qt.AlignTop):
-        """ add stretch default is 0, alignment default is None widgets"""
+    def addWidgets(self, widgets: List[QWidget], stretch=0, alignment=Qt.AlignmentFlag(0)):
+        """ add stretch default is 0, alignment default is None widgets """
         for widget in widgets:
             self.addWidget(widget, stretch, alignment)
 
     def addLayouts(self, layouts: List[QLayout], stretch=0):
-        """ add stretch default is 0 layouts"""
+        """ add stretch default is 0 layouts """
         for layout in layouts:
             self.addLayout(layout, stretch)
 

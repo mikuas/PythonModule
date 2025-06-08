@@ -87,7 +87,7 @@ class OutlineButtonDemo(SplitWidget):
             for item, icon in zip(items, icons):
                 match i:
                     case 0:
-                        button = OutlinePushButton(icon, self, item)
+                        button = OutlinePushButton(icon, item, self)
                     case 1:
                         button = OutlinePushButton(item, self)
                     case 2:

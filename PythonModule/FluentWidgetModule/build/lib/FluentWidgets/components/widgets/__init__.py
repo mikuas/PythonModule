@@ -5,7 +5,7 @@ from .button import (
     PrimarySplitToolButton, PrimaryDropDownPushButton, PrimaryDropDownToolButton,
     TogglePushButton, ToggleToolButton, TransparentPushButton, TransparentTogglePushButton,
     TransparentToggleToolButton, TransparentDropDownPushButton, TransparentDropDownToolButton,
-    PillPushButton, PillToolButton, OutlinePushButton, OutlineToolButton
+    PillPushButton, PillToolButton, RoundPushButton, RoundToolButton, OutlinePushButton, OutlineToolButton
 )
 from .card_widget import (
     CardWidget, ElevatedCardWidget, SimpleCardWidget, HeaderCardWidget, CardGroupWidget, GroupHeaderCardWidget
@@ -35,7 +35,7 @@ from .spin_box import (
 from .state_tool_tip import StateToolTip
 from .switch_button import SwitchButton, IndicatorPosition
 from .table_view import TableView, TableWidget, TableItemDelegate
-from .tool_tip import ToolTip, ToolTipFilter, ToolTipPosition
+from .tool_tip import ToolTip, ToolTipFilter, ToolTipPosition, setToolTipInfos, setToolTipInfo
 from .cycle_list_widget import CycleListWidget
 from .scroll_bar import ScrollBar, SmoothScrollBar, SmoothScrollDelegate
 from .flyout import FlyoutView, FlyoutViewBase, Flyout, FlyoutAnimationType, FlyoutAnimationManager
@@ -55,3 +55,7 @@ from .progress_bar import ProgressBar, IndeterminateProgressBar
 from .progress_ring import ProgressRing, IndeterminateProgressRing
 from .tree_view import TreeView, TreeWidget, TreeItemDelegate
 from .round_list_widget import RoundListWidget, RoundListWidgetItemDelegate
+from .multi_selection_combo_box import (
+    MultiSelectionListItem, MultiSelectionItem, MultiSelectionListWidget, MultiSelectionItemCheckBox,
+    MultiSelectionComboBox
+)

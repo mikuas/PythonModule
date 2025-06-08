@@ -1,20 +1,32 @@
 # coding:utf-8
-import random
-import sys
 from typing import List
 
 
 from PySide6.QtGui import QFont, Qt, QPainter, QColor, QPen
 from PySide6.QtCore import QSize
-from PySide6.QtWidgets import (
-    QApplication, QWidget, QStyle, QListWidget, QListWidgetItem, QStyledItemDelegate, QVBoxLayout, QPushButton,
-    QHBoxLayout
-)
+from PySide6.QtWidgets import QStyle, QListWidget, QListWidgetItem, QStyledItemDelegate
 
 from ...common.color import themeColor, isDarkTheme
-from ...common.style_sheet import setThemeColor
-from ...common.config import qconfig
+from ..widgets.scroll_area import SmoothScrollDelegate
 from .line_edit import LineEdit
+
+
+class RoundListWidgetItemDelegate(QStyledItemDelegate):
+
+    def __init__(self):
+        super().__init__()
+
+    def createEditor(self, parent, option, index):
+        editor = LineEdit(parent)
+        editor.setFixedHeight(option.rect.height())
+        editor.setClearButtonEnabled(True)
+        return editor
+
+    def setEditorData(self, editor, index):
+        editor.setText(index.model().data(index, Qt.EditRole))
+
+    def setModelData(self, editor, model, index):
+        model.setData(index, editor.text(), Qt.EditRole)
 
 
 class RoundListWidgetItemDelegate(QStyledItemDelegate):
@@ -56,7 +68,7 @@ class RoundListWidgetItemDelegate(QStyledItemDelegate):
         else:
             color = QColor("#000000") if isDark else QColor("#E8E8E8")
             textColor = self.__textColor or (QColor("#ffffff") if isDark else QColor("#000000"))
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.TextAntialiasing)
+        painter.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.TextAntialiasing)
         if self.__isFull:
             painter.setPen(Qt.NoPen)
             painter.setBrush(color)
@@ -89,13 +101,11 @@ class RoundListWidget(QListWidget):
         self.__items = []       # type: List[QListWidgetItem]
         self.__oldItem = None   # type: QListWidgetItem
         self.itemDelegate = RoundListWidgetItemDelegate(isFull, self)
-        from FluentWidgets import SmoothScrollDelegate
         self.scrollDelegate = SmoothScrollDelegate(self)
+        self.setMouseTracking(True)
 
         self.setItemDelegate(self.itemDelegate)
         self.setStyleSheet("QListWidget {background: transparent;}")
-
-        qconfig.themeColorChanged.connect(lambda: self.viewport().update())
 
     def __doubleItem(self, item):
         self.openPersistentEditor(item)

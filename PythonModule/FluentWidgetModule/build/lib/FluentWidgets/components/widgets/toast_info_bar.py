@@ -57,6 +57,7 @@ class ToastInfoBar(QFrame):
     ):
         super().__init__(parent)
         parent.installEventFilter(self)
+        self.setFrameShadow(QFrame.Shadow.Sunken)
         self.title = title
         self.content = content
         self.duration = duration
@@ -84,6 +85,7 @@ class ToastInfoBar(QFrame):
 
         self.__opacityAni = QPropertyAnimation(self.opacityEffect, b'opacity', self)
         self.__posAni = QPropertyAnimation(self, b'pos')
+        self.__posAni.setEasingCurve(QEasingCurve.OutQuad)
         self.manager = ToastInfoBarManager.get(self.position)
 
         self.__initWidget()
@@ -131,7 +133,6 @@ class ToastInfoBar(QFrame):
         self._adjustText()
 
     def __createPosAni(self):
-        self.__posAni.setEasingCurve(QEasingCurve.OutQuad)
         self.__posAni.setDuration(200)
         self.__posAni.setStartValue(self.startPosition)
         self.__posAni.setEndValue(self.endPosition)
@@ -145,7 +146,7 @@ class ToastInfoBar(QFrame):
         self.__opacityAni.start()
 
     def _adjustText(self):
-        width = self.parent().width() - 50
+        width = self.parent().width() / 1.5
 
         chars = max(min(width / 10, 120), 30)
         self.titleLabel.setText(TextWrap.wrap(self.title, chars, False)[0])
@@ -351,7 +352,7 @@ class TopToastInfoBarManager(ToastInfoBarManager):
 
     def _pos(self, toastInfoBar):
         x = (toastInfoBar.parent().width() - toastInfoBar.width()) / 2
-        y = -self.margin
+        y = -self.margin * 2.5
         for bar in self.toastInfoBars[:self.toastInfoBars.index(toastInfoBar)]:
             y += bar.height() + self.margin
         return QPoint(x, y + toastInfoBar.height())
@@ -366,7 +367,7 @@ class TopLeftToastInfoBarManager(ToastInfoBarManager):
 
     def _pos(self, toastInfoBar):
         x = self.margin
-        y = -self.margin
+        y = -self.margin * 2.5
         for bar in self.toastInfoBars[:self.toastInfoBars.index(toastInfoBar)]:
             y += bar.height() + self.margin
         return QPoint(x, y + toastInfoBar.height())
@@ -381,7 +382,7 @@ class TopRightToastInfoBarManager(ToastInfoBarManager):
 
     def _pos(self, toastInfoBar):
         x = toastInfoBar.parent().width() - toastInfoBar.width() - self.margin
-        y = -self.margin
+        y = -self.margin * 2.5
         for bar in self.toastInfoBars[:self.toastInfoBars.index(toastInfoBar)]:
             y += bar.height() + self.margin
         return QPoint(x, y + toastInfoBar.height())

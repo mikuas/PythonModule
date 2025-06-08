@@ -27,13 +27,12 @@ class PushButton(QPushButton):
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        FluentStyleSheet.BUTTON.apply(self)
+        self._postInit()
         self.isPressed = False
         self.isHover = False
         self.setIconSize(QSize(16, 16))
         self.setIcon(None)
         setFont(self)
-        self._postInit()
 
     @__init__.register
     def _(self, text: str, parent: QWidget = None, icon: Union[QIcon, str, FluentIconBase] = None):
@@ -50,7 +49,7 @@ class PushButton(QPushButton):
         self.__init__(text, parent, icon)
 
     def _postInit(self):
-        pass
+        FluentStyleSheet.BUTTON.apply(self)
 
     def setIcon(self, icon: Union[QIcon, str, FluentIconBase]):
         self.setProperty('hasIcon', icon is not None)
@@ -179,8 +178,7 @@ class TransparentTogglePushButton(TogglePushButton):
     Constructors
     ------------
     * TransparentTogglePushButton(`parent`: QWidget = None)
-    * TransparentTogglePushButton(`text`: str, `parent`: QWidget = None,
-                                  `icon`: QIcon | str | FluentIconBase = None)
+    * TransparentTogglePushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     * TransparentTogglePushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
     """
 
@@ -191,8 +189,7 @@ class HyperlinkButton(PushButton):
     Constructors
     ------------
     * HyperlinkButton(`parent`: QWidget = None)
-    * HyperlinkButton(`url`: str, `text`: str, `parent`: QWidget = None,
-                      `icon`: QIcon | str | FluentIconBase = None)
+    * HyperlinkButton(`url`: str, `text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     """
 
     @singledispatchmethod
@@ -248,8 +245,7 @@ class RadioButton(QRadioButton):
     Constructors
     ------------
     * RadioButton(`parent`: QWidget = None)
-    * RadioButton(`url`: text, `text`: str, `parent`: QWidget = None,
-                  `icon`: QIcon | str | FluentIconBase = None)
+    * RadioButton(`url`: text, `text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     """
 
     @singledispatchmethod
@@ -387,13 +383,12 @@ class ToolButton(QToolButton):
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        FluentStyleSheet.BUTTON.apply(self)
+        self._postInit()
         self.isPressed = False
         self.isHover = False
         self.setIconSize(QSize(16, 16))
         self.setIcon(QIcon())
         setFont(self)
-        self._postInit()
 
     @__init__.register
     def _(self, icon: FluentIconBase, parent: QWidget = None):
@@ -411,7 +406,7 @@ class ToolButton(QToolButton):
         self.setIcon(icon)
 
     def _postInit(self):
-        pass
+        FluentStyleSheet.BUTTON.apply(self)
 
     def setIcon(self, icon: Union[QIcon, str, FluentIconBase]):
         self._icon = icon
@@ -599,8 +594,7 @@ class DropDownPushButton(DropDownButtonBase, PushButton):
     Constructors
     ------------
     * DropDownPushButton(`parent`: QWidget = None)
-    * DropDownPushButton(`text`: str, `parent`: QWidget = None,
-                         `icon`: QIcon | str | FluentIconBase = None)
+    * DropDownPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     * DropDownPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
     """
 
@@ -619,8 +613,7 @@ class TransparentDropDownPushButton(DropDownPushButton):
     Constructors
     ------------
     * TransparentDropDownPushButton(`parent`: QWidget = None)
-    * TransparentDropDownPushButton(`text`: str, `parent`: QWidget = None,
-                                    `icon`: QIcon | str | FluentIconBase = None)
+    * TransparentDropDownPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     * TransparentDropDownPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
     """
 
@@ -671,8 +664,7 @@ class PrimaryDropDownPushButton(PrimaryDropDownButtonBase, PrimaryPushButton):
     Constructors
     ------------
     * PrimaryDropDownPushButton(`parent`: QWidget = None)
-    * PrimaryDropDownPushButton(`text`: str, `parent`: QWidget = None,
-                                `icon`: QIcon | str | FluentIconBase = None)
+    * PrimaryDropDownPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     * PrimaryDropDownPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
     """
 
@@ -888,8 +880,7 @@ class PrimarySplitPushButton(SplitPushButton):
     Constructors
     ------------
     * PrimarySplitPushButton(`parent`: QWidget = None)
-    * PrimarySplitPushButton(`text`: str, `parent`: QWidget = None,
-                             `icon`: QIcon | str | FluentIconBase = None)
+    * PrimarySplitPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     * PrimarySplitPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
     """
 
@@ -1024,8 +1015,7 @@ class PillPushButton(TogglePushButton, PillButtonBase):
     Constructors
     ------------
     * PillPushButton(`parent`: QWidget = None)
-    * PillPushButton(`text`: str, `parent`: QWidget = None,
-                     `icon`: QIcon | str | FluentIconBase = None)
+    * PillPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     * PillPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
     """
 
@@ -1047,77 +1037,114 @@ class PillToolButton(ToggleToolButton, PillButtonBase):
         PillButtonBase.paintEvent(self, e)
         ToggleToolButton.paintEvent(self, e)
 
+# New ---------------------------------------------------------------------------------------------------- New #
 
-class OutlinePushButton(QAbstractButton):
-    """ Outline PushButton
+
+class RoundButtonBase:
+
+    def setXRadius(self, radius: int):
+        if self._xRadius == radius:
+            return
+        self._xRadius = radius
+        self.update()
+
+    def setYRadius(self, radius: int):
+        if self._yRadius == radius:
+            return
+        self._yRadius = radius
+        self.update()
+
+    @property
+    def radius(self):
+        return self._xRadius, self._yRadius
+
+    def mousePressEvent(self, e):
+        super().mousePressEvent(e)
+        self.update()
+
+    def mouseReleaseEvent(self, e):
+        super().mouseReleaseEvent(e)
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        rect = self.rect()
+        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing)
+        color = self._drawBorder(painter, rect)
+        alignment = Qt.AlignmentFlag.AlignCenter
+        if not self.icon().isNull():
+            rect, alignment = self._drawIcon(painter, rect)
+        self._drawText(painter, color, rect, alignment)
+
+    def _postInit(self):
+        self._xRadius = 16
+        self._yRadius = 16
+        self._fontMetrics = QFontMetrics(self.font())
+        self.setFixedHeight(35)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+    def _drawBorder(self, painter: QPainter, rect: QRect):
+        color = QColor(255, 255, 255, 32) if isDarkTheme() else QColor(0, 0, 0, 32)
+        pen = QPen(color)
+        pen.setWidthF(1.5)
+        painter.setPen(pen)
+        if self.isPressed:
+            painter.setOpacity(0.768)
+        else:
+            painter.setOpacity(1.0)
+        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), *self.radius)
+        return color
+
+    def _drawIcon(self, painter: QPainter, rect: QRect):
+        size = self.iconSize().width()
+        if self.text():
+            x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size * 2) / 2
+        else:
+            x = (self.width() - size) / 2
+        y = (self.height() - size) / 2
+        drawIcon(self._icon, painter, QRect(x, y, size, size))
+        rect.adjust(x + size + 6, 0, 0, 0)
+        return rect, Qt.AlignVCenter
+
+    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment: Qt.AlignmentFlag):
+        color.setAlpha(255)
+        painter.setPen(color)
+        painter.drawText(rect, alignment, self.text())
+
+
+class RoundPushButton(RoundButtonBase,  PushButton):
+    """ Round PushButton
 
     Constructors
     ------------
-    * OutlinePushButton(`parent`: QWidget = None)
-    * OutlinePushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
-    * OutlinePushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * RoundPushButton(`parent`: QWidget = None)
+    * RoundPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
+    * RoundPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
     """
 
+
+class RoundToolButton(RoundButtonBase, ToolButton):
+    """ Round ToolButton
+
+    Constructors
+    ------------
+    * RoundToolButton(`parent`: QWidget = None)
+    * RoundToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    """
+
+    def setText(self, text): ...
+
+    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, align: Qt.AlignmentFlag): ...
+
+
+class OutlineButtonBase:
+
     checkedChange = Signal(bool)
-
-    @singledispatchmethod
-    def __init__(self, parent: QWidget = None):
-        super().__init__(parent)
-        self.__isHover = False
-        self.__isPressed = False
-        self.__outlineColor = None # type: QColor
-        setFont(self)
-        self.setAttribute(Qt.WA_StaticContents)
-        self.setFixedHeight(35)
-        self.setIconSize(QSize(16, 16))
-        self.setCheckable(True)
-        self._fontMetrics = QFontMetrics(self.font())
-        self.toggled.connect(lambda b: self.setChecked(b))
-
-    @__init__.register
-    def _(self, text: str, parent: QWidget = None, icon: Union[QIcon, str, FluentIconBase] = None):
-        self.__init__(parent=parent)
-        self.setText(text)
-        self.setIcon(icon)
-
-    @__init__.register
-    def _(self, icon: QIcon, text: str, parent: QWidget = None):
-        self.__init__(text, parent, icon)
-
-    @__init__.register
-    def _(self, icon: FluentIconBase, parent: QWidget = None, text: str = ''):
-        self.__init__(text, parent, icon)
 
     def setOutlineColor(self, color: str | QColor):
         if isinstance(color, str):
             color = QColor(color)
-        self.__outlineColor = color
-
-    def setIcon(self, icon: Union[QIcon, str, FluentIconBase]):
-        self.setProperty('hasIcon', icon is not None)
-        self._icon = icon or QIcon()
-        self.update()
-
-    def icon(self):
-        return toQIcon(self._icon)
-
-    def enterEvent(self, event):
-        super().enterEvent(event)
-        self.__isHover = True
-        self.update()
-
-    def leaveEvent(self, event):
-        super().leaveEvent(event)
-        self.__isHover = False
-        self.update()
-
-    def mousePressEvent(self, e):
-        super().mousePressEvent(e)
-        self.__isPressed = True
-
-    def mouseReleaseEvent(self, e):
-        super().mouseReleaseEvent(e)
-        self.__isPressed = False
+        self._outlineColor = color
 
     def setChecked(self, isChecked: bool):
         super().setChecked(isChecked)
@@ -1127,28 +1154,55 @@ class OutlinePushButton(QAbstractButton):
     def paintEvent(self, event):
         painter = QPainter(self)
         rect = self.rect()
-        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
-        c = 255 if isDarkTheme() else 0
-        bc = (self.__outlineColor or themeColor()) if self.isChecked() else QColor(c, c, c, 24)
-        align = Qt.AlignCenter
-        pen = QPen(bc)
+        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing)
+        color = self._drawBorder(painter, rect)
+        alignment = Qt.AlignmentFlag.AlignCenter
+        if not self.icon().isNull():
+            rect, alignment = self._drawIcon(painter, rect, color)
+        self._drawText(painter, color, rect, alignment)
+
+    def _postInit(self):
+        super()._postInit()
+        self._outlineColor = None # type: QColor
+        self._lastColor = None # type: QColor
+        self.setCheckable(True)
+        self.toggled.connect(self.setChecked)
+
+    def _drawIcon(self, painter: QPainter, rect: QRect, color: QColor):
+        if isinstance(self._icon, FluentIconBase) and self._lastColor != color:
+            self._icon = self._icon.colored(color, color)
+            self._lastColor = QColor(color)
+            print("colored")
+        size = self.iconSize().width()
+        if self.text():
+            x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size * 2) / 2
+        else:
+            x = (self.width() - size) / 2
+        y = (self.height() - size) / 2
+        drawIcon(self._icon, painter, QRect(x, y, size, size))
+        rect.adjust(x + size + 6, 0, 0, 0)
+        return rect, Qt.AlignVCenter
+
+    def _drawBorder(self, painter: QPainter, rect: QRect):
+        color = 255 if isDarkTheme() else 0
+        color = (self._outlineColor or themeColor()) if self.isChecked() else QColor(color, color, color, 24)
+        pen = QPen(color)
         pen.setWidthF(1.5)
         painter.setPen(pen)
-        painter.setOpacity(0.768 if self.__isHover else 1.0)
-        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), 16, 16)
-        if not self.icon().isNull():
-            # draw icon
-            if isinstance(self._icon, FluentIconBase):
-                self._icon = self._icon.colored(bc, bc)
-            size = self.iconSize().width()
-            x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size) / 2
-            y = (self.height() - size) / 2
-            print(x, y)
-            drawIcon(self._icon, painter, QRect(x, y, size, size))
-            rect.adjust(x + size + 6, 0, 0, 0)
-            align = Qt.AlignVCenter
-        # draw text
-        self._drawText(painter, bc, rect, align)
+        painter.setOpacity(0.768 if self.isHover else 1.0)
+        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), *self.radius)
+        return color
+
+
+class OutlinePushButton(OutlineButtonBase, RoundPushButton):
+    """ Outline PushButton
+
+    Constructors
+    ------------
+    * OutlinePushButton(`parent`: QWidget = None)
+    * OutlinePushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
+    * OutlinePushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    """
 
     def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment):
         color.setAlpha(255)
@@ -1156,18 +1210,11 @@ class OutlinePushButton(QAbstractButton):
         painter.drawText(rect, alignment, self.text())
 
 
-class OutlineToolButton(OutlinePushButton):
+class OutlineToolButton(OutlineButtonBase, RoundToolButton):
     """ Outline ToolButton
 
     Constructors
     ------------
     * OutlineToolButton(`parent`: QWidget = None)
-    * OutlineToolButton(`icon`: QIcon | FluentIcon, `parent`: QWidget = None)
+    * OutlineToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
     """
-
-    def setText(self, text): ...
-
-    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment): ...
-
-    def paintEvent(self, event):
-        OutlinePushButton.paintEvent(self, event)

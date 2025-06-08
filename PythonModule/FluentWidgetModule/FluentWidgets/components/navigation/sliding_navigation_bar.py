@@ -3,11 +3,11 @@ from typing import Union, overload, List, Dict
 
 from PySide6.QtWidgets import QWidget, QFrame, QHBoxLayout
 from PySide6.QtCore import Qt, QRect, Signal, QPropertyAnimation, QPoint, QTimer, QEvent, QEasingCurve
-from PySide6.QtGui import QPainter, QColor, QFontMetrics, QPen
+from PySide6.QtGui import QPainter, QColor, QFontMetrics, QPen, QIcon
 
 from ...common.color import themeColor, isDarkTheme
 from ...common.font import setFont
-from ...common.icon import FluentIcon
+from ...common.icon import FluentIcon, FluentIconBase, toQIcon
 from ...components.navigation.navigation_panel import RouteKeyError
 from ...components.widgets.tool_tip import setToolTipInfo, ToolTipPosition
 from ..widgets.scroll_widget import SingleDirectionScrollArea
@@ -22,19 +22,19 @@ class SlidingWidget(QWidget):
         setFont(self, 16)
         self.isHover = False
         self.isSelected = isSelected
-        self.__text = text
-        self.__icon = None # type: FluentIcon
-        self.__itemColor = None
-        self.__hoverColor = None
-        self.__selectedColor = None
-        self.__iconSize = 16
+        self._text = text
+        self._icon = None           # type: FluentIcon
+        self._itemColor = None      # type: QColor
+        self._hoverColor = None     # type: QColor
+        self._selectedColor = None  # type: QColor
+        self._lastColor = None      # type: QColor
+        self._iconSize = 16
         self._fontMetrics = QFontMetrics(self.font())
         self._adjustSize()
-        if icon:
-            self.setIcon(icon)
+        self.setIcon(icon)
 
     def _adjustSize(self, size=0):
-        self.setMinimumSize(self._fontMetrics.horizontalAdvance(self.__text) + 32 + size, 35)
+        self.setMinimumSize(self._fontMetrics.horizontalAdvance(self._text) + 32 + size, 35)
 
     def enterEvent(self, event):
         super().enterEvent(event)
@@ -55,65 +55,71 @@ class SlidingWidget(QWidget):
         self.update()
 
     def setText(self, text: str):
-        self.__text = text
+        self._text = text
         self._adjustSize()
         self.update()
 
     def setIcon(self, icon: FluentIcon):
-        self.__icon = icon
-        self._adjustSize(self.__iconSize * 2)
+        self._icon = icon or QIcon()
+        self._adjustSize(self._iconSize * 2)
         self.update()
 
+    def icon(self):
+        return toQIcon(self._icon)
+
     def setIconSize(self, size: int):
-        if self.__iconSize == size:
+        if self._iconSize == size:
             return
-        self.__iconSize = size
+        self._iconSize = size
         self.update()
 
     def setItemColor(self, color: Union[str, QColor]):
-        if self.__itemColor == color:
+        if self._itemColor == color:
             return
-        self.__itemColor = color
+        self._itemColor = color
         self.update()
 
     def setItemHoverColor(self, color: Union[str, QColor]):
-        if self.__hoverColor == color:
+        if self._hoverColor == color:
             return
-        self.__hoverColor = color
+        self._hoverColor = color
         self.update()
 
     def setItemSelectedColor(self, color: Union[str, QColor]):
-        if self.__selectedColor == color:
+        if self._selectedColor == color:
             return
-        self.__selectedColor = color
+        self._selectedColor = color
         self.update()
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
+        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing)
         rect = self.rect()
-        align = Qt.AlignCenter
+        alignment = Qt.AlignCenter
         if self.isSelected:
-            c = self.__selectedColor or themeColor()
+            color = self._selectedColor or themeColor()
         elif self.isHover:
-            c = self.__hoverColor or themeColor()
+            color = self._hoverColor or themeColor()
         else:
-            c = self.__itemColor or (255 if isDarkTheme() else 0)
-        if self.__icon:
-            x = (self.width() - self._fontMetrics.horizontalAdvance(self.__text) - self.__iconSize) / 2
-            y = (self.height() - self.__iconSize) / 2
-            self._drawIcon(c, painter, QRect(x, y, self.__iconSize, self.__iconSize))
-            rect.adjust(x + self.__iconSize + 6, 0, 0, 0)
-            align = Qt.AlignVCenter
-        self._drawText(c, painter, rect, align)
+            color = self._itemColor or (255 if isDarkTheme() else 0)
+        if not self.icon().isNull():
+            rect, alignment = self._drawIcon(color, painter, rect)
+        self._drawText(color, painter, rect, alignment)
 
-    def _drawIcon(self, color, painter: QPainter, rect: QRect):
-        self.__icon = self.__icon.colored(color, color)
-        self.__icon.render(painter, rect)
+    def _drawIcon(self, color: QColor, painter: QPainter, rect: QRect):
+        if isinstance(self._icon, FluentIconBase) and self._lastColor != color:
+            self._icon = self._icon.colored(color, color)
+            self._lastColor = QColor(color)
+            print("colored")
+        x = (self.width() - self._fontMetrics.horizontalAdvance(self._text) - self._iconSize) / 2
+        y = (self.height() - self._iconSize) / 2
+        self._icon.render(painter, QRect(x, y, self._iconSize, self._iconSize))
+        rect.adjust(x + self._iconSize + 6, 0, 0, 0)
+        return rect, Qt.AlignVCenter
 
-    def _drawText(self, color, painter: QPainter, rect: QRect, align: Qt.AlignmentFlag):
+    def _drawText(self, color, painter: QPainter, rect: QRect, alignment: Qt.AlignmentFlag):
         painter.setPen(color)
-        painter.drawText(rect, align, self.__text)
+        painter.drawText(rect, alignment, self._text)
 
 
 class SlidingLine(QFrame):
@@ -124,7 +130,9 @@ class SlidingLine(QFrame):
         self._color = color
 
     def setLineColor(self, color: Union[str, QColor]):
-        self._color = QColor(color)
+        if isinstance(color, str):
+            color = QColor(color)
+        self._color = color
         self.update()
 
     def paintEvent(self, event):
@@ -144,7 +152,9 @@ class SmoothSeparator(QWidget):
         self._color = None
 
     def setSeparatorColor(self, color: Union[str, QColor]):
-        self._color = QColor(color)
+        if isinstance(color, str):
+            color = QColor(color)
+        self._color = color
         self.update()
 
     def paintEvent(self, event):
@@ -169,9 +179,9 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         self._widget = QWidget()
         self._widget.setStyleSheet("background:transparent;")
         self.__currentItem = None # type: SlidingWidget
-        self.__slideLineWidth = 30
         self._slidingLine = SlidingLine(self._widget)
         self._slidingLine.raise_()
+        self.__slideLineWidth = 30
         self._slidingLine.setFixedSize(self.__slideLineWidth, 3)
         self.__posAni = QPropertyAnimation(self._slidingLine, b"pos")
         self.__posAni.setEasingCurve(QEasingCurve.OutCubic)
@@ -202,11 +212,20 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         self.__posAni.setEndValue(self.__getSlideEndPos(item))
         self.__posAni.start()
 
+    def __make(self, name: str, *args, **kwargs):
+        for item in self._items.values():
+            method = getattr(item, name, None)
+            if callable(method):
+                method(*args, **kwargs)
+
     def __adjustSlideLinePos(self):
         QTimer.singleShot(1, lambda: (self._slidingLine.move(self.__getSlideEndPos(self.__currentItem))))
 
     def _onClicked(self, item: SlidingWidget):
         self.setCurrentWidget(item)
+
+    def setEasingCurve(self, easing: QEasingCurve.Type):
+        self.__posAni.setEasingCurve(easing)
 
     def setBarAlignment(self, alignment: Qt.AlignmentFlag):
         self._widgetLayout.setAlignment(alignment)
@@ -227,23 +246,17 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
     def setSlideLineColor(self, color: Union[str, QColor]):
         self._slidingLine.setLineColor(color)
 
-    def __function(self, name: str, *args, **kwargs):
-        for item in self._items.values():
-            method = getattr(item, name, None)
-            if callable(method):
-                method(*args, **kwargs)
-
     def setItemSelectedColor(self, color: Union[str, QColor]):
-        self.__function("setItemSelectedColor", color)
+        self.__make("setItemSelectedColor", color)
 
     def setItemColor(self, color: Union[str, QColor]):
-        self.__function("setItemColor", color)
+        self.__make("setItemColor", color)
 
     def setItemHoverColor(self, color: Union[str, QColor]):
-        self.__function("setItemHoverColor", color)
+        self.__make("setItemHoverColor", color)
 
     def setItemSize(self, width: int, height: int):
-        self.__function("setFixedSize", width, height)
+        self.__make("setFixedSize", width, height)
 
     @overload
     def setCurrentWidget(self, item: str): ...
@@ -267,7 +280,7 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         QTimer.singleShot(1, lambda: self.__createPosAni(item))
 
     def setCurrentIndex(self, index: int):
-        if len(self._items.keys()) > index < 0:
+        if len(self._items.keys()) >= index < 0:
             return
         self.setCurrentWidget(list(self._items.keys())[index])
 
@@ -325,10 +338,12 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
             self.__currentItem = item
             self._onClicked(item)
 
-    def currentItem(self):
+    def currentItem(self) -> Union[SlidingWidget, None]:
         return self.__currentItem
 
     def item(self, routeKey: str) -> SlidingWidget:
+        if routeKey not in self._items:
+            raise RouteKeyError(f"`{routeKey}` is illegal")
         return self._items[routeKey]
 
     def allItem(self) -> List[SlidingWidget]:
