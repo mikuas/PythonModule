@@ -372,7 +372,7 @@ class RadioButton(QRadioButton):
     darkTextColor = Property(QColor, getDarkTextColor, setDarkTextColor)
 
 
-class SubtitleRadioButton(RadioButton):
+class SubtitleRadioButton(RadioButton): # New
     """ SubTitle Radio button
 
     Constructors
@@ -388,8 +388,8 @@ class SubtitleRadioButton(RadioButton):
         self._margin = 8
         style = self.styleSheet() + """
             RadioButton {
-                min-height: 40px;
-                max-height: 40px;
+                min-height: 50px;
+                max-height: 64px;
                 background-color: transparent;
                 font: 14px 'Segoe UI', 'Microsoft YaHei',
                 'PingFang SC';
@@ -1097,10 +1097,8 @@ class PillToolButton(ToggleToolButton, PillButtonBase):
         PillButtonBase.paintEvent(self, e)
         ToggleToolButton.paintEvent(self, e)
 
-# New ---------------------------------------------------------------------------------------------------- New #
 
-
-class RoundButtonBase:
+class RoundButtonBase: # New
 
     def setXRadius(self, radius: int):
         if self._xRadius == radius:
@@ -1172,7 +1170,7 @@ class RoundButtonBase:
         painter.drawText(rect, alignment, self.text())
 
 
-class RoundPushButton(RoundButtonBase,  PushButton):
+class RoundPushButton(RoundButtonBase,  PushButton): # New
     """ Round PushButton
 
     Constructors
@@ -1183,7 +1181,7 @@ class RoundPushButton(RoundButtonBase,  PushButton):
     """
 
 
-class RoundToolButton(RoundButtonBase, ToolButton):
+class RoundToolButton(RoundButtonBase, ToolButton): # New
     """ Round ToolButton
 
     Constructors
@@ -1197,7 +1195,7 @@ class RoundToolButton(RoundButtonBase, ToolButton):
     def _drawText(self, painter: QPainter, color: QColor, rect: QRect, align: Qt.AlignmentFlag): ...
 
 
-class OutlineButtonBase:
+class OutlineButtonBase: # New
 
     checkedChange = Signal(bool)
 
@@ -1254,7 +1252,7 @@ class OutlineButtonBase:
         return color
 
 
-class OutlinePushButton(OutlineButtonBase, RoundPushButton):
+class OutlinePushButton(OutlineButtonBase, RoundPushButton): # New
     """ Outline PushButton
 
     Constructors
@@ -1270,7 +1268,7 @@ class OutlinePushButton(OutlineButtonBase, RoundPushButton):
         painter.drawText(rect, alignment, self.text())
 
 
-class OutlineToolButton(OutlineButtonBase, RoundToolButton):
+class OutlineToolButton(OutlineButtonBase, RoundToolButton): # New
     """ Outline ToolButton
 
     Constructors

@@ -1,31 +1,38 @@
-from PySide6.QtWidgets import QApplication, QFrame, QWidget, QVBoxLayout
-from PySide6.QtCore import Qt
-import sys
+from PySide6.QtWidgets import (
+    QApplication, QMenu, QPushButton, QWidget,
+    QLineEdit, QWidgetAction
+)
 
-class CssShadowExample(QWidget):
-    def __init__(self):
-        super().__init__()
+app = QApplication([])
 
-        layout = QVBoxLayout(self)
+main = QWidget()
+main.resize(300, 200)
 
-        # 创建QFrame并应用CSS阴影
-        frame = QFrame(self)
-        frame.setFrameShape(QFrame.StyledPanel)
-        frame.setMinimumSize(200, 100)
-        frame.setStyleSheet("""
-            QFrame {
-                background-color: white;
-                border-radius: 10px;
-                box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
-            }
-        """)
+btn = QPushButton("弹出菜单", main)
+btn.move(100, 80)
 
-        layout.addWidget(frame, alignment=Qt.AlignCenter)
-        self.setWindowTitle("CSS阴影示例")
-        self.resize(300, 200)
+def show_menu():
+    menu = QMenu()
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = CssShadowExample()
-    window.show()
-    sys.exit(app.exec())
+    # 普通菜单项
+    menu.addAction("选项 A")
+
+    # 自定义 QWidget（如 QLineEdit）
+    line_edit = QLineEdit()
+    line_edit.setPlaceholderText("请输入内容...")
+
+    # 包装成 QWidgetAction
+    widget_action = QWidgetAction(menu)
+    widget_action.setDefaultWidget(line_edit)
+    menu.addAction(widget_action)
+
+    # 更多菜单项
+    menu.addAction("选项 B")
+
+    # 弹出
+    menu.exec(btn.mapToGlobal(btn.rect().bottomLeft()))
+
+btn.clicked.connect(show_menu)
+
+main.show()
+app.exec()
