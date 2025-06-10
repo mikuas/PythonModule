@@ -58,3 +58,4 @@ from .multi_selection_combo_box import (
     MultiSelectionListItem, MultiSelectionItem, MultiSelectionListWidget, MultiSelectionItemCheckBox,
     MultiSelectionComboBox
 )
+from drop_down_color_palette import DropDownColorPalette

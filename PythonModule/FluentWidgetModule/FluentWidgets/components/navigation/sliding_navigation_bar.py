@@ -110,7 +110,6 @@ class SlidingWidget(QWidget):
         if isinstance(self._icon, FluentIconBase) and self._lastColor != color:
             self._icon = self._icon.colored(color, color)
             self._lastColor = QColor(color)
-            print("colored")
         x = (self.width() - self._fontMetrics.horizontalAdvance(self._text) - self._iconSize) / 2
         y = (self.height() - self._iconSize) / 2
         self._icon.render(painter, QRect(x, y, self._iconSize, self._iconSize))

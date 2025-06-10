@@ -1,14 +1,17 @@
 # coding:utf-8
-import sys
 import random
 from typing import Union
 
-from PySide6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QButtonGroup
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QButtonGroup
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtCore import Qt, QSize, Signal, QPoint, QRectF
 
-from FluentWidgets import HorizontalSeparator, SplitWidget, TransparentToolButton, FluentIcon, RoundMenu, \
-    MenuAnimationType, BodyLabel, TransparentPushButton, getFont
+from ...common.separator import HorizontalSeparator
+from ...common.icon import FluentIcon
+from ...common.font import getFont
+from .button import TransparentToolButton, TransparentPushButton
+from .menu import RoundMenu, MenuAnimationType
+from .label import BodyLabel
 
 
 def getRandomColor(isRgb=False):
@@ -301,23 +304,3 @@ class DropDownColorPalette(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setPen(QColor(0, 0, 0, 32))
         painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), 8, 8)
-
-
-class Demo(SplitWidget):
-    def __init__(self):
-        super().__init__()
-        self.box = QVBoxLayout(self)
-
-        self.colorPalette = DropDownColorPalette(self)
-        self.colorPalette.colorChange.connect(lambda c: print(c.name()))
-        self.box.addWidget(self.colorPalette, 0, Qt.AlignCenter)
-
-        self.colorPalette.setDefaultColor('deeppink')
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = Demo()
-    window.resize(800, 520)
-    window.show()
-    sys.exit(app.exec())
