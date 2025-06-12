@@ -1112,6 +1112,15 @@ class RoundButtonBase: # New
         self._yRadius = radius
         self.update()
 
+    def setBorderColor(self, color: Union[str, QColor]):
+        if isinstance(color, str):
+            color = QColor(color)
+        self._borderColor = color
+        self.update()
+
+    def borderColor(self):
+        return self._borderColor
+
     @property
     def radius(self):
         return self._xRadius, self._yRadius
@@ -1137,13 +1146,14 @@ class RoundButtonBase: # New
     def _postInit(self):
         self._xRadius = 16
         self._yRadius = 16
+        self._borderColor = None # type: QColor
         self._fontMetrics = QFontMetrics(self.font())
         self.setFixedHeight(35)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
     def _drawBorder(self, painter: QPainter, rect: QRect):
         color = QColor(255, 255, 255, 32) if isDarkTheme() else QColor(0, 0, 0, 32)
-        pen = QPen(color)
+        pen = QPen(self.borderColor() or color)
         pen.setWidthF(1.5)
         painter.setPen(pen)
         if self.isPressed:

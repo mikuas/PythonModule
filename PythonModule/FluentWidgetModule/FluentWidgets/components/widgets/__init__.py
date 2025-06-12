@@ -31,6 +31,7 @@ from .spin_box import (
     SpinBox, DoubleSpinBox, DateEdit, DateTimeEdit, TimeEdit, CompactSpinBox, CompactDoubleSpinBox,
     CompactDateEdit, CompactDateTimeEdit, CompactTimeEdit
 )
+from .separator import VerticalSeparator, HorizontalSeparator
 from .state_tool_tip import StateToolTip
 from .switch_button import SwitchButton, IndicatorPosition
 from .table_view import TableView, TableWidget, TableItemDelegate
@@ -49,6 +50,7 @@ from .drag_widget import DragFileWidget, DragFolderWidget
 from .popup_drawer_widget import PopupDrawerWidget, PopupDrawerPosition
 from .info_bar import InfoBar, InfoBarPosition
 from .toast_info_bar import ToastInfoBar, ToastInfoBarPosition
+from .teaching_tip import TeachingTip, TeachingTipTailPosition, TeachingTipView, PopupTeachingTip
 from .stacked_widget import PopUpAniStackedWidget, OpacityAniStackedWidget
 from .progress_bar import ProgressBar, IndeterminateProgressBar
 from .progress_ring import ProgressRing, IndeterminateProgressRing

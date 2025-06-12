@@ -185,28 +185,3 @@ class UrlDialog(MessageBoxBase):
 
         # set min width
         self.widget.setMinimumWidth(350)
-
-
-class CustomDialog(MessageBoxBase):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.hide()
-        self.widget.setMinimumSize(parent.width() / 2, parent.height() / 2)
-
-    def addWidget(self, widget: QWidget, stretch=0, alignment=Qt.AlignmentFlag(0)):
-        self.viewLayout.addWidget(widget, stretch, alignment)
-
-    def setFixedWidth(self, width: int):
-        self.widget.setFixedWidth(width)
-
-    def setFixedHeight(self, height: int):
-        self.widget.setFixedHeight(height)
-
-    def setFixedSize(self, width: int, height: int):
-        self.widget.setFixedSize(width, height)
-
-    def width(self):
-        return self.widget.width()
-
-    def height(self):
-        return self.widget.height()

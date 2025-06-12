@@ -1,38 +1,58 @@
-from PySide6.QtWidgets import (
-    QApplication, QMenu, QPushButton, QWidget,
-    QLineEdit, QWidgetAction
-)
+# coding:utf-8
+import sys
 
-app = QApplication([])
+from FluentWidgets import AvatarWidget, BodyLabel, CaptionLabel, HyperlinkButton, setFont, RoundMenu, Action, FluentIcon
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import QWidget, QApplication
 
-main = QWidget()
-main.resize(300, 200)
 
-btn = QPushButton("弹出菜单", main)
-btn.move(100, 80)
+class ProfileCard(QWidget):
+    """ Profile card """
 
-def show_menu():
-    menu = QMenu()
+    def __init__(self, avatarPath: str, name: str, email: str, parent=None):
+        super().__init__(parent=parent)
+        self.avatar = AvatarWidget(avatarPath, self)
+        self.nameLabel = BodyLabel(name, self)
+        self.emailLabel = CaptionLabel(email, self)
+        self.logoutButton = HyperlinkButton('https://qfluentwidgets.com/', '注销', self)
 
-    # 普通菜单项
-    menu.addAction("选项 A")
+        self.emailLabel.setTextColor(QColor(96, 96, 96), QColor(206, 206, 206))
+        setFont(self.logoutButton, 13)
 
-    # 自定义 QWidget（如 QLineEdit）
-    line_edit = QLineEdit()
-    line_edit.setPlaceholderText("请输入内容...")
+        self.setFixedSize(307, 82)
+        self.avatar.setRadius(24)
+        self.avatar.move(2, 15)
+        self.nameLabel.move(64, 13)
+        self.emailLabel.move(64, 32)
+        self.logoutButton.move(52, 48)
 
-    # 包装成 QWidgetAction
-    widget_action = QWidgetAction(menu)
-    widget_action.setDefaultWidget(line_edit)
-    menu.addAction(widget_action)
 
-    # 更多菜单项
-    menu.addAction("选项 B")
+class Demo(QWidget):
 
-    # 弹出
-    menu.exec(btn.mapToGlobal(btn.rect().bottomLeft()))
+    def __init__(self):
+        super().__init__()
 
-btn.clicked.connect(show_menu)
+    def contextMenuEvent(self, e) -> None:
+        menu = RoundMenu(parent=self)
 
-main.show()
-app.exec()
+        # add custom widget
+        card = ProfileCard(':/icons/Honkai_Star_Rail.ico', '硝子酱', 'shokokawaii@outlook.com', menu)
+        menu.addWidget(card, selectable=False)
+
+        menu.addSeparator()
+        menu.addActions([
+            Action(FluentIcon.PEOPLE, '管理账户和设置'),
+            Action(FluentIcon.SHOPPING_CART, '支付方式'),
+            Action(FluentIcon.CODE, '兑换代码和礼品卡'),
+        ])
+        menu.addSeparator()
+        menu.addAction(Action(FluentIcon.SETTING, '设置'))
+        menu.exec(e.globalPos())
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = Demo()
+    window.resize(800, 520)
+    window.show()
+    sys.exit(app.exec())

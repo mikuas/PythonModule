@@ -12,4 +12,3 @@ from .translator import FluentTranslator
 from .router import qrouter, Router
 from .color import FluentThemeColor, FluentSystemColor
 from .theme_listener import SystemThemeListener
-from .separator import VerticalSeparator, HorizontalSeparator
