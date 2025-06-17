@@ -3,27 +3,33 @@
 """ TopNavigationWidget """
 
 import sys
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout
-from PySide6.QtGui import QColor
+from functools import partial
+
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget
+from PySide6.QtGui import QColor, QIcon
 from PySide6.QtCore import Qt
 
 from FluentWidgets import SplitWidget, SlidingNavigationBar, FluentIcon, PopUpAniStackedWidget, TitleLabel, \
-    SlidingNavigationWidget
+    SlidingNavigationWidget, HorizontalSeparator, Icon, WinFluentIcon
 
 
 class TopNavigationWidget(SplitWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("TopNavigationWidgetDemo")
+        self.setWindowIcon(QIcon(":/icons/Honkai_Star_Rail.ico"))
+
         self.box = QVBoxLayout(self)
-        self.box.setContentsMargins(5, 35, 15, 0)
-        self.navigation = SlidingNavigationBar(self)
-        self.stackedWidget = PopUpAniStackedWidget(self)
+        self.box.setContentsMargins(0, 35, 0, 0)
+        self.topNavigationWidget = SlidingNavigationWidget(self)
+        self.setStyleSheet("background-color: #f0f3f9")
+        self.topNavigationWidget.stackedWidget.setStyleSheet("background-color: #f7f9fc")
 
-        self.box.addWidget(self.navigation, 0)
-        self.box.addWidget(self.stackedWidget, 1)
+        self.box.addWidget(self.topNavigationWidget, 1)
 
+        self.topNavigationWidget.widgetLayout.insertSpacing(1, 5)
+        self.topNavigationWidget.widgetLayout.insertWidget(2, HorizontalSeparator(self).setSeparatorColor("#e5e7ea"))
         self.initNavigation()
-        self.navigation.setCurrentIndex(0)
 
     def initNavigation(self):
         items = {
@@ -35,20 +41,23 @@ class TopNavigationWidget(SplitWidget):
             "正在播放": FluentIcon.VIDEO
         }
         for item, icon in items.items():
-            w = TitleLabel(item)
-            self.navigation.addItem(
-                item, item, icon, lambda: self.stackedWidget.setCurrentWidget(w), False
+            title = TitleLabel(item, self)
+            title.setAlignment(Qt.AlignCenter)
+            self.topNavigationWidget.addSubInterface(
+                item, item, title, icon, True if item == "下载" else False, toolTip=item
             )
-            self.stackedWidget.addWidget(w)
-        self.navigation.addStretch(1)
-        self.navigation.addItem(
-            "Settings", "", FluentIcon.SETTING, lambda: print("Setting"), False
+        self.topNavigationWidget.navigation.addStretch(1)
+        title = TitleLabel("Settings")
+        title.setAlignment(Qt.AlignCenter)
+        self.topNavigationWidget.addSubInterface(
+            "Settings", "", title, FluentIcon.SETTING, toolTip="Settings"
         )
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = TopNavigationWidget()
+    # window.windowEffect.setMicaEffect(window.winId(), isAlt=True)
     window.resize(800, 520)
     window.show()
     sys.exit(app.exec())

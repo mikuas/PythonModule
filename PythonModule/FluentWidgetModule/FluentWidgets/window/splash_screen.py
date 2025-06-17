@@ -2,7 +2,7 @@
 from typing import Union
 import sys
 
-from PySide6.QtCore import Qt, QSize, QRectF, QEvent
+from PySide6.QtCore import Qt, QSize, QRectF, QEvent, QEventLoop, QTimer
 from PySide6.QtGui import QPixmap, QPainter, QColor, QIcon
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QGraphicsDropShadowEffect
 
@@ -40,6 +40,18 @@ class SplashScreen(QWidget):
 
         if sys.platform == "darwin":
             self.titleBar.hide()
+
+    def run(self, msec=2500):
+        loop = QEventLoop(self)
+        QTimer.singleShot(msec, loop.quit)
+        loop.exec()
+        self.finish()
+        self.deleteLater()
+
+    def hideTitleBarButton(self):
+        self.titleBar.minBtn.hide()
+        self.titleBar.maxBtn.hide()
+        self.titleBar.closeBtn.hide()
 
     def setIcon(self, icon: Union[str, QIcon, FluentIconBase]):
         self._icon = icon

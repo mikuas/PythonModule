@@ -16,7 +16,6 @@ class OutlineButtonDemo(SplitWidget):
         super().__init__()
         self.setWindowTitle("OutlineButtonDemo")
         self.setWindowIcon(QIcon(":/icons/Honkai_Star_Rail.ico"))
-        self.windowEffect.setMicaEffect(self.winId(), isAlt=True)
 
         self.mainLayout = QHBoxLayout(self)
         self.imageLabel = ImageLabel(":/icons/xier.jpg", self)
@@ -28,7 +27,7 @@ class OutlineButtonDemo(SplitWidget):
         self.widgetLayout.setContentsMargins(0, 50, 10, 0)
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
 
-        self.drawer = PopupDrawerWidget(self, "OutlineButton设置")
+        self.drawer = PopupDrawerWidget("OutlineButton设置", parent=self)
         self.button = PrimaryPushButton("设置", self)
 
         self.button.clicked.connect(self.showDrawer)

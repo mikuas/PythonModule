@@ -17,7 +17,7 @@ class SlidingWidget(QWidget):
 
     clicked = Signal(QWidget)
 
-    def __init__(self, text: str, icon: FluentIcon = None, isSelected=False, parent=None):
+    def __init__(self, text: str, icon: FluentIconBase = None, isSelected=False, parent=None):
         super().__init__(parent)
         setFont(self, 16)
         self.isHover = False
@@ -218,7 +218,7 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
                 method(*args, **kwargs)
 
     def __adjustSlideLinePos(self):
-        QTimer.singleShot(1, lambda: (self._slidingLine.move(self.__getSlideEndPos(self.__currentItem))))
+        self._slidingLine.move(self.__getSlideEndPos(self.__currentItem))
 
     def _onClicked(self, item: SlidingWidget):
         self.setCurrentWidget(item)
@@ -272,8 +272,7 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
             return
         for obj in values:
             obj.setSelected(False)
-        if self.__currentItem:
-            self.currentItemChanged.emit(self.__currentItem)
+        self.currentItemChanged.emit(item)
         self.__currentItem = item
         item.setSelected(True)
         QTimer.singleShot(1, lambda: self.__createPosAni(item))
@@ -286,6 +285,9 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
     def addStretch(self, stretch: int):
         self._widgetLayout.addStretch(stretch)
 
+    def addSpacing(self, size: int):
+        self._widgetLayout.addSpacing(size)
+
     def addItem(
             self,
             routeKey: str,
@@ -293,10 +295,9 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
             icon: FluentIcon = None,
             onClick=None,
             isSelected=False,
-            alignment: Qt.AlignmentFlag = Qt.AlignTop,
             toolTip: str = None
     ):
-        self.insertItem(-1, routeKey, text, icon, onClick, isSelected, alignment, toolTip)
+        self.insertItem(-1, routeKey, text, icon, onClick, isSelected, toolTip)
 
     def insertItem(
             self,
@@ -306,14 +307,13 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
             icon: FluentIcon = None,
             onClick=None,
             isSelected=False,
-            alignment: Qt.AlignmentFlag = Qt.AlignTop,
             toolTip: str = None
     ):
         if routeKey in self._items:
             raise RouteKeyError('routeKey Are Not Unique')
         item = SlidingWidget(text, icon, isSelected, self._widget)
         item.setProperty("routeKey", routeKey)
-        self._widgetLayout.insertWidget(index, item, alignment=alignment)
+        self._widgetLayout.insertWidget(index, item)
         self._items[routeKey] = item
 
         item.clicked.connect(self._onClicked)
@@ -323,6 +323,12 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
             self.setCurrentWidget(routeKey)
         if toolTip:
             setToolTipInfo(item, toolTip, 1500, ToolTipPosition.TOP)
+
+    def addWidget(self, widget: QWidget):
+        self.insertWidget(-1, widget)
+
+    def insertWidget(self, index: int, widget: QWidget):
+        self._widgetLayout.insertWidget(index, widget)
 
     def removeItem(self, routeKey: str):
         if routeKey not in self._items:
@@ -369,10 +375,9 @@ class SlidingToolNavigationBar(SlidingNavigationBar):
             icon: FluentIcon,
             onClick=None,
             isSelected=False,
-            alignment: Qt.AlignmentFlag = Qt.AlignTop,
             toolTip: str = None
     ):
-        self.insertItem(-1, routeKey, icon, onClick, isSelected, alignment, toolTip)
+        self.insertItem(-1, routeKey, icon, onClick, isSelected, toolTip)
 
     def insertItem(
             self,
@@ -381,14 +386,13 @@ class SlidingToolNavigationBar(SlidingNavigationBar):
             icon: FluentIcon,
             onClick=None,
             isSelected=False,
-            alignment: Qt.AlignmentFlag = Qt.AlignTop,
             toolTip: str = None
     ):
         if routeKey in self._items:
             raise RouteKeyError('routeKey Are Not Unique')
         item = SlidingWidget('', icon, isSelected, self._widget)
         item.setProperty("routeKey", routeKey)
-        self._widgetLayout.insertWidget(index, item, alignment=alignment)
+        self._widgetLayout.insertWidget(index, item)
         self._items[routeKey] = item
 
         item.clicked.connect(self._onClicked)

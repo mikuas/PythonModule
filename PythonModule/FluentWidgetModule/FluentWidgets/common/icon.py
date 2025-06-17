@@ -5,7 +5,8 @@ import json
 
 from PySide6.QtXml import QDomDocument
 from PySide6.QtCore import QRectF, Qt, QFile, QObject, QRect
-from PySide6.QtGui import QIcon, QIconEngine, QColor, QPixmap, QImage, QPainter, QFontDatabase, QFont, QAction, QPainterPath
+from PySide6.QtGui import QIcon, QIconEngine, QColor, QPixmap, QImage, QPainter, QFontDatabase, QFont, QAction, \
+    QPainterPath, QShortcut, QKeySequence
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QApplication
 
@@ -776,22 +777,30 @@ class Action(QAction):
     @singledispatchmethod
     def __init__(self, parent: QObject = None, **kwargs):
         super().__init__(parent, **kwargs)
+        self._shortcut = QShortcut(self)
         self.fluentIcon = None
 
     @__init__.register
     def _(self, text: str, parent: QObject = None, **kwargs):
         super().__init__(text, parent, **kwargs)
+        self._shortcut = QShortcut(self)
         self.fluentIcon = None
 
     @__init__.register
     def _(self, icon: QIcon, text: str, parent: QObject = None, **kwargs):
         super().__init__(icon, text, parent, **kwargs)
+        self._shortcut = QShortcut(self)
         self.fluentIcon = None
 
     @__init__.register
     def _(self, icon: FluentIconBase, text: str, parent: QObject = None, **kwargs):
         super().__init__(icon.icon(), text, parent, **kwargs)
+        self._shortcut = QShortcut(self)
         self.fluentIcon = icon
+
+    def shortcut(self):
+        super().shortcut()
+        return self._shortcut.key()
 
     def icon(self) -> QIcon:
         if self.fluentIcon:
@@ -805,3 +814,13 @@ class Action(QAction):
             icon = icon.icon()
 
         super().setIcon(icon)
+
+    def setShortcut(self, shortcut):
+        super().setShortcut(shortcut)
+        self._shortcut.setKey(QKeySequence(shortcut))
+        self._shortcut.activated.connect(self.triggered.emit)
+        self._shortcut.setContext(Qt.ApplicationShortcut)
+        return self
+
+    def setShortcutContext(self, context):
+        self._shortcut.setContext(context)

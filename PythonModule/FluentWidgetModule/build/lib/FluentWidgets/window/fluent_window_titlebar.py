@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout
 
 from ..common.style_sheet import FluentStyleSheet
 
-from qframelesswindow import TitleBar
+from qframelesswindow import TitleBar, TitleBarBase
 
 
 class FluentTitleBar(TitleBar):
@@ -78,6 +78,47 @@ class SplitTitleBar(TitleBar):
         self.window().windowTitleChanged.connect(self.setTitle)
 
         FluentStyleSheet.FLUENT_WINDOW.apply(self)
+
+    def setTitle(self, title):
+        self.titleLabel.setText(title)
+        self.titleLabel.adjustSize()
+
+    def setIcon(self, icon):
+        self.iconLabel.setPixmap(QIcon(icon).pixmap(18, 18))
+
+
+class CustomTitleBar(TitleBarBase):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedHeight(50)
+        self.hBoxLayout = QHBoxLayout(self)
+        self.iconLabel = QLabel(self)
+        self.titleLabel = QLabel(self)
+
+        self.titleLabel.setObjectName('titleLabel')
+        self.iconLabel.setFixedSize(18, 18)
+
+        # add buttons to layout
+        self.hBoxLayout.setSpacing(0)
+        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.hBoxLayout.addSpacing(12)
+        self.hBoxLayout.addWidget(self.iconLabel, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        self.hBoxLayout.addSpacing(10)
+        self.hBoxLayout.addWidget(self.titleLabel, 0, Qt.AlignLeft | Qt.AlignVCenter)
+
+        self.initButton()
+        self.window().windowIconChanged.connect(self.setIcon)
+        self.window().windowTitleChanged.connect(self.setTitle)
+
+        FluentStyleSheet.FLUENT_WINDOW.apply(self)
+
+    def initButton(self):
+        self.hBoxLayout.addStretch(1)
+
+        self.hBoxLayout.addWidget(self.minBtn, 0, Qt.AlignRight | Qt.AlignTop)
+        self.hBoxLayout.addWidget(self.maxBtn, 0, Qt.AlignRight | Qt.AlignTop)
+        self.hBoxLayout.addWidget(self.closeBtn, 0, Qt.AlignRight | Qt.AlignTop)
 
     def setTitle(self, title):
         self.titleLabel.setText(title)

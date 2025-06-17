@@ -4,18 +4,21 @@ import sys
 
 from PySide6.QtCore import Qt, QSize, QRect
 from PySide6.QtGui import QIcon, QPainter, QColor
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QApplication
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QApplication
 
 from ..common.config import qconfig
-from ..common.icon import FluentIconBase
+from ..common.icon import FluentIconBase, FluentIcon
 from ..common.router import qrouter
 from ..common.style_sheet import FluentStyleSheet, isDarkTheme
 from ..common.animation import BackgroundAnimationWidget
 from ..components.widgets.frameless_window import FramelessWindow
 from ..components.navigation import (
-    NavigationInterface, NavigationBar, NavigationItemPosition, NavigationBarPushButton, NavigationTreeWidget
+    NavigationInterface, NavigationBar, NavigationItemPosition, NavigationBarPushButton, NavigationTreeWidget, \
+    SlidingNavigationBar
 )
-from .stacked_widget import StackedWidget
+from ..components.widgets.separator import HorizontalSeparator
+from .stacked_widget import StackedWidget, PopUpAniStackedWidget
+from .split_widget import SplitWidget
 from .fluent_window_titlebar import FluentTitleBar, MSFluentTitleBar, SplitTitleBar
 
 from qframelesswindow import TitleBarBase
@@ -328,6 +331,46 @@ class SplitFluentWindow(FluentWindow):
 
         self.titleBar.raise_()
         self.navigationInterface.displayModeChanged.connect(self.titleBar.raise_)
+
+
+class TopNavigationWindow(SplitWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.widgetLayout = QVBoxLayout(self)
+        self.widgetLayout.setSpacing(0)
+        self.widgetLayout.setContentsMargins(0, 35, 0, 0)
+        self.navigation = SlidingNavigationBar(self)
+        self.stackedWidget = PopUpAniStackedWidget(self)
+
+        self.setStyleSheet("background-color: #f0f3f9")
+        self.stackedWidget.setStyleSheet("background-color: #f7f9fc")
+        self.widgetLayout.addWidget(self.navigation,0, Qt.AlignTop)
+        self.widgetLayout.addSpacing(10)
+        self.widgetLayout.addWidget(HorizontalSeparator(self).setSeparatorColor("#E5E7EA"))
+        self.widgetLayout.addWidget(self.stackedWidget, 1)
+
+    def _switchTo(self, widget: QWidget):
+        self.stackedWidget.setCurrentWidget(widget)
+
+    def setCurrentWidget(self, item: Union[str, QWidget]):
+        if isinstance(item, QWidget):
+            item = item.property("routeKey")
+        self.navigation.setCurrentWidget(item)
+
+    def setCurrentIndex(self, index: int):
+        self.navigation.setCurrentIndex(index)
+        self._switchTo(self.stackedWidget.widget(index))
+
+    def addSubInterface(self, routeKey: str, text: str, widget: QWidget, icon: FluentIcon = None, isSelected = False, toolTip=None):
+        widget.setProperty("routeKey", routeKey)
+        self.navigation.addItem(routeKey, text, icon, lambda: self._switchTo(widget), isSelected, toolTip)
+        self.stackedWidget.addWidget(widget)
+        if isSelected:
+            self.stackedWidget.setCurrentWidget(widget)
+
+    def removeSubInterface(self, widget: QWidget):
+        self.navigation.removeItem(widget.property("routeKey"))
+        self.stackedWidget.removeWidget(widget)
 
 
 class FluentBackgroundTheme:

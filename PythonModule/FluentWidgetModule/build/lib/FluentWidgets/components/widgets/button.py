@@ -245,7 +245,7 @@ class RadioButton(QRadioButton):
     Constructors
     ------------
     * RadioButton(`parent`: QWidget = None)
-    * RadioButton(`url`: text, `text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
+    * RadioButton(`text`: str, `parent`: QWidget = None)
     """
 
     @singledispatchmethod
@@ -255,6 +255,7 @@ class RadioButton(QRadioButton):
         self._darkTextColor = QColor(255, 255, 255)
         self.indicatorPos = QPoint(11, 12)
         self.isHover = False
+        self._margin = 0
 
         FluentStyleSheet.BUTTON.apply(self)
         self.setAttribute(Qt.WA_MacShowFocusRect, False)
@@ -332,12 +333,12 @@ class RadioButton(QRadioButton):
         path.setFillRule(Qt.FillRule.WindingFill)
 
         # outer circle (border)
-        outerRect = QRectF(center.x() - radius, center.y() - radius, 2 * radius, 2 * radius)
+        outerRect = QRectF(center.x() - radius, center.y() - radius + self._margin, 2 * radius, 2 * radius)
         path.addEllipse(outerRect)
 
         # inner center (filled)
         ir = radius - thickness
-        innerRect = QRectF(center.x() - ir, center.y() - ir, 2 * ir, 2 * ir)
+        innerRect = QRectF(center.x() - ir, center.y() - ir + self._margin, 2 * ir, 2 * ir)
         innerPath = QPainterPath()
         innerPath.addEllipse(innerRect)
 
@@ -369,6 +370,65 @@ class RadioButton(QRadioButton):
 
     lightTextColor = Property(QColor, getLightTextColor, setLightTextColor)
     darkTextColor = Property(QColor, getDarkTextColor, setDarkTextColor)
+
+
+class SubtitleRadioButton(RadioButton): # New
+    """ SubTitle Radio button
+
+    Constructors
+    ------------
+    * SubtitleRadioButton(`parent`: QWidget = None)
+    * SubtitleRadioButton(`text`: str, `subText`: str, parent`: QWidget = None)
+    """
+
+    @singledispatchmethod
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+        self._subText = None
+        self._margin = 8
+        style = self.styleSheet() + """
+            RadioButton {
+                min-height: 50px;
+                max-height: 64px;
+                background-color: transparent;
+                font: 14px 'Segoe UI', 'Microsoft YaHei',
+                'PingFang SC';
+                color: black;
+            }
+        """
+        self.setStyleSheet(style)
+
+    @__init__.register
+    def _(self, text: str, subText: str, parent: QWidget = None):
+        self.__init__(parent)
+        self.setText(text)
+        self.setSubText(subText)
+
+    def setSubText(self, text: str):
+        self._subText = text
+        self.update()
+
+    def subText(self):
+        return self._subText
+
+    def _drawText(self, painter: QPainter):
+        if not self.isEnabled():
+            painter.setOpacity(0.36)
+
+        font = self.font()
+        color = self.textColor()
+        width = self.width()
+        height = self.height()
+        painter.setFont(font)
+        painter.setPen(color)
+        painter.drawText(30, 5, width, height / 1.8, Qt.AlignVCenter, self.text())
+
+        font.setPixelSize(12)
+        color = QColor(color)
+        color.setAlpha(128)
+        painter.setFont(font)
+        painter.setPen(color)
+        painter.drawText(30, 17, width, height / 1.5, Qt.AlignVCenter, self.subText())
 
 
 class ToolButton(QToolButton):
@@ -1037,10 +1097,8 @@ class PillToolButton(ToggleToolButton, PillButtonBase):
         PillButtonBase.paintEvent(self, e)
         ToggleToolButton.paintEvent(self, e)
 
-# New ---------------------------------------------------------------------------------------------------- New #
 
-
-class RoundButtonBase:
+class RoundButtonBase: # New
 
     def setXRadius(self, radius: int):
         if self._xRadius == radius:
@@ -1053,6 +1111,15 @@ class RoundButtonBase:
             return
         self._yRadius = radius
         self.update()
+
+    def setBorderColor(self, color: Union[str, QColor]):
+        if isinstance(color, str):
+            color = QColor(color)
+        self._borderColor = color
+        self.update()
+
+    def borderColor(self):
+        return self._borderColor
 
     @property
     def radius(self):
@@ -1079,13 +1146,14 @@ class RoundButtonBase:
     def _postInit(self):
         self._xRadius = 16
         self._yRadius = 16
+        self._borderColor = None # type: QColor
         self._fontMetrics = QFontMetrics(self.font())
         self.setFixedHeight(35)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
     def _drawBorder(self, painter: QPainter, rect: QRect):
         color = QColor(255, 255, 255, 32) if isDarkTheme() else QColor(0, 0, 0, 32)
-        pen = QPen(color)
+        pen = QPen(self.borderColor() or color)
         pen.setWidthF(1.5)
         painter.setPen(pen)
         if self.isPressed:
@@ -1112,7 +1180,7 @@ class RoundButtonBase:
         painter.drawText(rect, alignment, self.text())
 
 
-class RoundPushButton(RoundButtonBase,  PushButton):
+class RoundPushButton(RoundButtonBase,  PushButton): # New
     """ Round PushButton
 
     Constructors
@@ -1123,7 +1191,7 @@ class RoundPushButton(RoundButtonBase,  PushButton):
     """
 
 
-class RoundToolButton(RoundButtonBase, ToolButton):
+class RoundToolButton(RoundButtonBase, ToolButton): # New
     """ Round ToolButton
 
     Constructors
@@ -1137,7 +1205,7 @@ class RoundToolButton(RoundButtonBase, ToolButton):
     def _drawText(self, painter: QPainter, color: QColor, rect: QRect, align: Qt.AlignmentFlag): ...
 
 
-class OutlineButtonBase:
+class OutlineButtonBase: # New
 
     checkedChange = Signal(bool)
 
@@ -1194,7 +1262,7 @@ class OutlineButtonBase:
         return color
 
 
-class OutlinePushButton(OutlineButtonBase, RoundPushButton):
+class OutlinePushButton(OutlineButtonBase, RoundPushButton): # New
     """ Outline PushButton
 
     Constructors
@@ -1210,7 +1278,7 @@ class OutlinePushButton(OutlineButtonBase, RoundPushButton):
         painter.drawText(rect, alignment, self.text())
 
 
-class OutlineToolButton(OutlineButtonBase, RoundToolButton):
+class OutlineToolButton(OutlineButtonBase, RoundToolButton): # New
     """ Outline ToolButton
 
     Constructors
