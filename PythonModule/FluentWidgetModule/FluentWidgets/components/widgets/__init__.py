@@ -64,3 +64,4 @@ from .multi_selection_combo_box import (
     MultiSelectionComboBox
 )
 from .drop_down_color_palette import DropDownColorPalette
+from .pin_box import PinBox

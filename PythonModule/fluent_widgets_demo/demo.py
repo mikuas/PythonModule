@@ -14,7 +14,7 @@ class ProfileCard(QWidget):
         self.avatar = AvatarWidget(avatarPath, self)
         self.nameLabel = BodyLabel(name, self)
         self.emailLabel = CaptionLabel(email, self)
-        self.logoutButton = HyperlinkButton('https://qfluentwidgets.com/', '注销', self)
+        self.logoutButton = HyperlinkButton('https://mihoyo.com/', '注销', self)
 
         self.emailLabel.setTextColor(QColor(96, 96, 96), QColor(206, 206, 206))
         setFont(self.logoutButton, 13)
@@ -36,7 +36,7 @@ class Demo(QWidget):
         menu = RoundMenu(parent=self)
 
         # add custom widget
-        card = ProfileCard(':/icons/Honkai_Star_Rail.ico', '硝子酱', 'shokokawaii@outlook.com', menu)
+        card = ProfileCard(':/icons/Honkai_Star_Rail.ico', '三月七', 'sanyueqi@outlook.com', menu)
         menu.addWidget(card, selectable=False)
 
         menu.addSeparator()

@@ -24,19 +24,17 @@ class SlidingNavigationWidget(QWidget):
     def _switchTo(self, widget: QWidget):
         self.stackedWidget.setCurrentWidget(widget)
 
-    @overload
-    def setCurrentWidget(self, item: str): ...
-    @overload
-    def setCurrentWidget(self, item: QWidget): ...
-
     def setCurrentWidget(self, item: Union[str, QWidget]):
         if isinstance(item, QWidget):
             item = item.property("routeKey")
         self.navigation.setCurrentWidget(item)
 
-    def addSubInterface(self, routeKey: str, text: str, widget: QWidget, icon: FluentIcon = None, alignment=Qt.AlignTop, toolTip=None):
+    def setCurrentIndex(self, index: int):
+        self.navigation.setCurrentIndex(index)
+
+    def addSubInterface(self, routeKey: str, text: str, widget: QWidget, icon: FluentIcon = None, toolTip=None):
         widget.setProperty("routeKey", routeKey)
-        self.navigation.addItem(routeKey, text, icon, lambda: self._switchTo(widget), alignment=alignment, toolTip=toolTip)
+        self.navigation.addItem(routeKey, text, icon, lambda: self._switchTo(widget), toolTip=toolTip)
         self.stackedWidget.addWidget(widget)
 
     def removeSubInterface(self, widget: QWidget):

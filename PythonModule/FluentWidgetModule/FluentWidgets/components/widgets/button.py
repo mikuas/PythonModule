@@ -1156,8 +1156,10 @@ class RoundButtonBase: # New
         pen = QPen(self.borderColor() or color)
         pen.setWidthF(1.5)
         painter.setPen(pen)
-        if self.isPressed:
-            painter.setOpacity(0.768)
+        if not self.isEnabled():
+            painter.setOpacity(0.3628)
+        elif self.isPressed:
+            painter.setOpacity(0.657)
         else:
             painter.setOpacity(1.0)
         painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), *self.radius)
@@ -1231,8 +1233,8 @@ class OutlineButtonBase: # New
 
     def _postInit(self):
         super()._postInit()
-        self._outlineColor = None # type: QColor
-        self._lastColor = None # type: QColor
+        self._outlineColor = None   # type: QColor
+        self._lastColor = None      # type: QColor
         self.setCheckable(True)
         self.toggled.connect(self.setChecked)
 
@@ -1240,7 +1242,6 @@ class OutlineButtonBase: # New
         if isinstance(self._icon, FluentIconBase) and self._lastColor != color:
             self._icon = self._icon.colored(color, color)
             self._lastColor = QColor(color)
-            print("colored")
         size = self.iconSize().width()
         if self.text():
             x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size * 2) / 2
@@ -1257,7 +1258,12 @@ class OutlineButtonBase: # New
         pen = QPen(color)
         pen.setWidthF(1.5)
         painter.setPen(pen)
-        painter.setOpacity(0.768 if self.isHover else 1.0)
+        if not self.isEnabled():
+            painter.setOpacity(0.3628)
+        elif self.isHover:
+            painter.setOpacity(0.657)
+        else:
+            painter.setOpacity(1.0)
         painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), *self.radius)
         return color
 
