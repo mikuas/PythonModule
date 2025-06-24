@@ -1098,32 +1098,39 @@ class PillToolButton(ToggleToolButton, PillButtonBase):
         ToggleToolButton.paintEvent(self, e)
 
 
+
 class RoundButtonBase: # New
 
-    def setXRadius(self, radius: int):
-        if self._xRadius == radius:
+    def setRadius(self, x: int, y: int):
+        if self.__xRadius == x and self.__yRadius == y:
             return
-        self._xRadius = radius
+        self.__xRadius = x
+        self.__yRadius = y
+        self.update()
+
+    def setXRadius(self, radius: int):
+        if self.__xRadius == radius:
+            return
+        self.__xRadius = radius
         self.update()
 
     def setYRadius(self, radius: int):
-        if self._yRadius == radius:
+        if self.__yRadius == radius:
             return
-        self._yRadius = radius
+        self.__yRadius = radius
         self.update()
 
     def setBorderColor(self, color: Union[str, QColor]):
         if isinstance(color, str):
             color = QColor(color)
-        self._borderColor = color
+        self.__borderColor = color
         self.update()
 
     def borderColor(self):
-        return self._borderColor
+        return self.__borderColor
 
-    @property
     def radius(self):
-        return self._xRadius, self._yRadius
+        return self.__xRadius, self.__yRadius
 
     def mousePressEvent(self, e):
         super().mousePressEvent(e)
@@ -1144,9 +1151,9 @@ class RoundButtonBase: # New
         self._drawText(painter, color, rect, alignment)
 
     def _postInit(self):
-        self._xRadius = 16
-        self._yRadius = 16
-        self._borderColor = None # type: QColor
+        self.__xRadius = 16
+        self.__yRadius = 16
+        self.__borderColor = None # type: QColor
         self._fontMetrics = QFontMetrics(self.font())
         self.setFixedHeight(35)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -1162,7 +1169,7 @@ class RoundButtonBase: # New
             painter.setOpacity(0.657)
         else:
             painter.setOpacity(1.0)
-        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), *self.radius)
+        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), *self.radius())
         return color
 
     def _drawIcon(self, painter: QPainter, rect: QRect):
@@ -1207,6 +1214,91 @@ class RoundToolButton(RoundButtonBase, ToolButton): # New
     def _drawText(self, painter: QPainter, color: QColor, rect: QRect, align: Qt.AlignmentFlag): ...
 
 
+class FillButtonBase(RoundButtonBase): # New
+
+    def _postInit(self):
+        super()._postInit()
+        self.setRadius(6, 6)
+        self.__fillColor = None      # type: QColor
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        rect = self.rect()
+        painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
+        color = QColor(0, 0, 0) if isDarkTheme() and self.isEnabled() else QColor(255, 255, 255)
+        alignment = Qt.AlignCenter
+        self._drawBackground(painter)
+        if not self.icon().isNull():
+            rect, alignment = self._drawIcon(painter, rect)
+        self._drawText(painter, color, rect, alignment)
+
+    def setBorderColor(self, color: Union[str, QColor]): ...
+
+    def setFillColor(self, color: Union[str, QColor]):
+        if isinstance(color, str):
+            color = QColor(color)
+        if color == self.__fillColor:
+            return
+        self.__fillColor = color
+        self.update()
+
+    def fillColor(self):
+        return self.__fillColor or themeColor()
+
+    def _drawBackground(self, painter: QPainter):
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(self.__fillColor or themeColor())
+        if not self.isEnabled():
+            painter.setOpacity(0.3628)
+        elif self.isPressed:
+            painter.setOpacity(0.728)
+        elif self.isHover:
+            painter.setOpacity(0.867)
+        painter.drawRoundedRect(self.rect(), *self.radius())
+
+    def _drawIcon(self, painter: QPainter, rect: QRect):
+        size = self.iconSize().width()
+        if self.text():
+            x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size * 2) / 2
+        else:
+            x = (self.width() - size) / 2
+        y = (self.height() - size) / 2
+        if isinstance(self._icon, FluentIconBase):
+            if self.isEnabled():
+                theme = Theme.LIGHT if isDarkTheme() else Theme.DARK
+                self._icon = self._icon.icon(theme)
+            else:
+                self._icon = self._icon.icon(Theme.DARK)
+        drawIcon(self._icon, painter, QRect(x, y, size, size))
+        rect.adjust(x + size + 6, 0, 0, 0)
+        return rect, Qt.AlignVCenter
+
+
+class FillPushButton(FillButtonBase, PushButton): # New
+    """ Fill PushButton
+
+    Constructors
+    ------------
+    * FillPushButton(`parent`: QWidget = None)
+    * FillPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
+    * FillPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    """
+
+
+class FillToolButton(FillButtonBase, ToolButton): # New
+    """ Fill ToolButton
+
+    Constructors
+    ------------
+    * FillToolButton(`parent`: QWidget = None)
+    * FillToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    """
+
+    def setText(self, text): ...
+
+    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment: Qt.AlignmentFlag): ...
+
+
 class OutlineButtonBase: # New
 
     checkedChange = Signal(bool)
@@ -1214,7 +1306,7 @@ class OutlineButtonBase: # New
     def setOutlineColor(self, color: str | QColor):
         if isinstance(color, str):
             color = QColor(color)
-        self._outlineColor = color
+        self.__outlineColor = color
 
     def setChecked(self, isChecked: bool):
         super().setChecked(isChecked)
@@ -1233,15 +1325,15 @@ class OutlineButtonBase: # New
 
     def _postInit(self):
         super()._postInit()
-        self._outlineColor = None   # type: QColor
-        self._lastColor = None      # type: QColor
+        self.__outlineColor = None   # type: QColor
+        self.__lastColor = None      # type: QColor
         self.setCheckable(True)
         self.toggled.connect(self.setChecked)
 
     def _drawIcon(self, painter: QPainter, rect: QRect, color: QColor):
-        if isinstance(self._icon, FluentIconBase) and self._lastColor != color:
+        if isinstance(self._icon, FluentIconBase) and self.__lastColor != color:
             self._icon = self._icon.colored(color, color)
-            self._lastColor = QColor(color)
+            self.__lastColor = QColor(color)
         size = self.iconSize().width()
         if self.text():
             x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size * 2) / 2
@@ -1254,7 +1346,7 @@ class OutlineButtonBase: # New
 
     def _drawBorder(self, painter: QPainter, rect: QRect):
         color = 255 if isDarkTheme() else 0
-        color = (self._outlineColor or themeColor()) if self.isChecked() else QColor(color, color, color, 24)
+        color = (self.__outlineColor or themeColor()) if self.isChecked() else QColor(color, color, color, 24)
         pen = QPen(color)
         pen.setWidthF(1.5)
         painter.setPen(pen)
@@ -1264,7 +1356,7 @@ class OutlineButtonBase: # New
             painter.setOpacity(0.657)
         else:
             painter.setOpacity(1.0)
-        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), *self.radius)
+        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), *self.radius())
         return color
 
 
@@ -1277,11 +1369,6 @@ class OutlinePushButton(OutlineButtonBase, RoundPushButton): # New
     * OutlinePushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     * OutlinePushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
     """
-
-    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment):
-        color.setAlpha(255)
-        painter.setPen(color)
-        painter.drawText(rect, alignment, self.text())
 
 
 class OutlineToolButton(OutlineButtonBase, RoundToolButton): # New
