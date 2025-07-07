@@ -21,7 +21,6 @@ FluentWidgets/common/image_utils.py
 FluentWidgets/common/overload.py
 FluentWidgets/common/router.py
 FluentWidgets/common/screen.py
-FluentWidgets/common/separator.py
 FluentWidgets/common/smooth_scroll.py
 FluentWidgets/common/style_sheet.py
 FluentWidgets/common/theme_listener.py
@@ -92,6 +91,8 @@ FluentWidgets/components/widgets/menu.py
 FluentWidgets/components/widgets/menu_bar.py
 FluentWidgets/components/widgets/multi_selection_combo_box.py
 FluentWidgets/components/widgets/page_widget.py
+FluentWidgets/components/widgets/pager.py
+FluentWidgets/components/widgets/pin_box.py
 FluentWidgets/components/widgets/pips_pager.py
 FluentWidgets/components/widgets/popup_drawer_widget.py
 FluentWidgets/components/widgets/progress_bar.py

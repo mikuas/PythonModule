@@ -11,6 +11,7 @@ from ...common.style_sheet import FluentStyleSheet, themeColor
 from ...common.icon import isDarkTheme, FluentIconBase, drawIcon
 from ...common.icon import FluentIcon as FIF
 from ...common.font import setFont
+from .button import PushButton
 from .tool_tip import ToolTipFilter
 from .menu import LineEditMenu, TextEditMenu, RoundMenu, MenuAnimationType, IndicatorMenuItemDelegate
 from .scroll_bar import SmoothScrollDelegate
@@ -527,3 +528,42 @@ class PasswordLineEdit(LineEdit):
             return super().inputMethodQuery(query)
 
     passwordVisible = Property(bool, isPasswordVisible, setPasswordVisible)
+
+
+class LabelLineEdit(LineEdit):
+    def __init__(self, prefix: str, suffix: str, parent=None):
+        super().__init__(parent)
+        self.setMinimumHeight(40)
+        self._prefixLabel = PushButton(prefix, self)
+        self._suffixLabel = PushButton(suffix, self)
+
+        self.hBoxLayout.insertWidget(0, self._prefixLabel, 1, Qt.AlignLeft)
+        self.hBoxLayout.addWidget(self._suffixLabel, 0, Qt.AlignRight)
+
+        self._prefixLabel.adjustSize()
+        self._suffixLabel.adjustSize()
+        self._adjustTextMargins()
+
+    def _adjustTextMargins(self):
+        left = len(self.leftButtons) * 30 + self._prefixLabel.width()
+        right = len(self.rightButtons) * 30 + 28 * self.isClearButtonEnabled() + self._suffixLabel.width()
+        m = self.textMargins()
+        self.setTextMargins(left, m.top(), right, m.bottom())
+
+    def setPrefix(self, prefix: str):
+        if prefix:
+            self._prefixLabel.setText(prefix)
+            self._prefixLabel.adjustSize()
+            self._adjustTextMargins()
+
+    def setSuffix(self, suffix: str):
+        if suffix:
+            self._suffixLabel.setText(suffix)
+            self._suffixLabel.adjustSize()
+            self._adjustTextMargins()
+
+    def prefix(self):
+        return self._prefixLabel.text()
+
+    def suffix(self):
+        return self._suffixLabel.text()

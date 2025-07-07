@@ -5,15 +5,16 @@ import subprocess
 import sys
 import time
 
-from FluentWidgets.common.icon import toQIcon
+from FluentWidgets.common.icon import toQIcon, ColoredFluentIcon
+from FluentWidgets.components.widgets.button import FillPushButton
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QAbstractItemView
 from PySide6.QtGui import QColor
-from PySide6.QtCore import Qt, QStringListModel, QSize, QModelIndex, QEasingCurve
+from PySide6.QtCore import Qt, QStringListModel, QSize, QModelIndex, QEasingCurve, QTimer
 
 from FluentWidgets import ListWidget, CycleListWidget, SplitWidget, ListView, RoundListWidget, FluentIcon, getFont, \
     InfoBar, ToastInfoBar, InfoBarPosition, ToastInfoBarPosition, setTheme, Theme, theme, ComboBox, TitleLabel, \
     SlidingNavigationWidget, RoundPushButton, RoundToolButton, OutlinePushButton, OutlineToolButton, PushButton, \
-    ToolButton, PrimaryPushButton, PrimaryToolButton
+    ToolButton, PrimaryPushButton, PrimaryToolButton, isDarkTheme
 from pmutils import JsonUtils
 
 
@@ -156,6 +157,27 @@ class Demo(SplitWidget):
         self.roundButton.setEnabled(not self.data["isReboot"])
 
         self.jsonUtil = JsonUtils()
+
+        self.fillButton = FillPushButton("Toggle Theme", self)
+        self.box.addWidget(self.fillButton)
+        self.fillButton.clicked.connect(
+            lambda: {
+                setTheme(Theme.LIGHT) if isDarkTheme() else setTheme(Theme.DARK),
+                self.setMicaEffectEnabled(True),
+                # QTimer.singleShot(500, self.updateWidget),
+                self.updateWidget(),
+                print(True)
+            }
+        )
+
+    @staticmethod
+    def updateWidget():
+        for w in QApplication.allWidgets():
+            print(w)
+            try:
+                w.update()
+            except TypeError:
+                w.update(w.currentIndex())
 
     # @staticmethod
     def restart(self):

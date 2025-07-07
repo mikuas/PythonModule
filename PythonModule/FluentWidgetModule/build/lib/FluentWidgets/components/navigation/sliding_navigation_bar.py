@@ -59,7 +59,7 @@ class SlidingWidget(QWidget):
         self._adjustSize()
         self.update()
 
-    def setIcon(self, icon: FluentIcon):
+    def setIcon(self, icon: FluentIconBase):
         self._icon = icon or QIcon()
         self._adjustSize(self._iconSize * 2)
         self.update()
@@ -101,7 +101,7 @@ class SlidingWidget(QWidget):
         elif self.isHover:
             color = self._hoverColor or themeColor()
         else:
-            color = self._itemColor or (255 if isDarkTheme() else 0)
+            color = self._itemColor or (QColor(255, 255, 255) if isDarkTheme() else QColor(0, 0, 0))
         if not self.icon().isNull():
             rect, alignment = self._drawIcon(color, painter, rect)
         self._drawText(color, painter, rect, alignment)
@@ -116,7 +116,7 @@ class SlidingWidget(QWidget):
         rect.adjust(x + self._iconSize + 6, 0, 0, 0)
         return rect, Qt.AlignVCenter
 
-    def _drawText(self, color, painter: QPainter, rect: QRect, alignment: Qt.AlignmentFlag):
+    def _drawText(self, color: QColor, painter: QPainter, rect: QRect, alignment: Qt.AlignmentFlag):
         painter.setPen(color)
         painter.drawText(rect, alignment, self._text)
 
@@ -278,7 +278,7 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         QTimer.singleShot(1, lambda: self.__createPosAni(item))
 
     def setCurrentIndex(self, index: int):
-        if len(self._items.keys()) >= index < 0:
+        if 0 > index <= len(self._items.keys()):
             return
         self.setCurrentWidget(list(self._items.keys())[index])
 

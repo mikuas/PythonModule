@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QB
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtCore import Qt, QSize, Signal, QPoint, QRectF
 
-from ...common.separator import HorizontalSeparator
+from .separator import HorizontalSeparator
 from ...common.icon import FluentIcon
 from ...common.font import getFont
 from .button import TransparentToolButton, TransparentPushButton

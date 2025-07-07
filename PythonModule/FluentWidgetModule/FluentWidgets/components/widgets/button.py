@@ -385,7 +385,7 @@ class SubtitleRadioButton(RadioButton): # New
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self._subText = None
-        self._margin = 8
+        self._margin = 10
         style = self.styleSheet() + """
             RadioButton {
                 min-height: 50px;
@@ -421,14 +421,14 @@ class SubtitleRadioButton(RadioButton): # New
         height = self.height()
         painter.setFont(font)
         painter.setPen(color)
-        painter.drawText(30, 5, width, height / 1.8, Qt.AlignVCenter, self.text())
+        painter.drawText(30, 0, width, height / 1.8, Qt.AlignVCenter, self.text())
 
         font.setPixelSize(12)
         color = QColor(color)
         color.setAlpha(128)
         painter.setFont(font)
         painter.setPen(color)
-        painter.drawText(30, 17, width, height / 1.5, Qt.AlignVCenter, self.subText())
+        painter.drawText(30, 12, width, height / 1.5, Qt.AlignVCenter, self.subText())
 
 
 class ToolButton(QToolButton):
@@ -1140,6 +1140,9 @@ class RoundButtonBase: # New
         super().mouseReleaseEvent(e)
         self.update()
 
+    def sizeHint(self):
+        return super().sizeHint() + QSize(15, 0)
+
     def paintEvent(self, event):
         painter = QPainter(self)
         rect = self.rect()
@@ -1249,9 +1252,9 @@ class FillButtonBase(RoundButtonBase): # New
         painter.setPen(Qt.NoPen)
         painter.setBrush(self.__fillColor or themeColor())
         if not self.isEnabled():
-            painter.setOpacity(0.3628)
+            painter.setOpacity(0.345)
         elif self.isPressed:
-            painter.setOpacity(0.728)
+            painter.setOpacity(0.567)
         elif self.isHover:
             painter.setOpacity(0.867)
         painter.drawRoundedRect(self.rect(), *self.radius())

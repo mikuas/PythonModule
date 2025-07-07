@@ -4,7 +4,8 @@ from .button import (
     SplitToolButton, PrimaryToolButton, PrimarySplitPushButton, PrimarySplitToolButton, PrimaryDropDownPushButton,
     PrimaryDropDownToolButton, TogglePushButton, ToggleToolButton, TransparentPushButton, TransparentTogglePushButton,
     TransparentToggleToolButton, TransparentDropDownPushButton, TransparentDropDownToolButton, PillPushButton,
-    PillToolButton, RoundPushButton, RoundToolButton, OutlinePushButton, OutlineToolButton
+    PillToolButton, RoundPushButton, RoundToolButton, FillPushButton, FillToolButton, OutlinePushButton,
+    OutlineToolButton
 )
 from .card_widget import (
     CardWidget, ElevatedCardWidget, SimpleCardWidget, HeaderCardWidget, CardGroupWidget, GroupHeaderCardWidget
